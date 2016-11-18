@@ -136,6 +136,7 @@ def CloseProgram(window, updatebox):
 
 def ConvertToXLSX(updatebox, window):
     global RUNNING
+    global OUTSIDEKILL
     RUNNING = True
     writedir = "converted/"
     date = time.strftime("%d-%m-%y")
@@ -201,6 +202,7 @@ def ConvertToXLSX(updatebox, window):
                         window.update()
                     if OUTSIDEKILL:
                         #kills the program if requested. This quits without saving the workbook.
+                        OUTSIDEKILL = False
                         RUNNING = False
                         messagebox.showinfo(title="Aborted Run", message="Run aborted, output file not complete!")
                         return
