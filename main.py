@@ -1,3 +1,9 @@
+'''
+Created on Nov 18, 2016
+
+@author: Matthew Muresan
+'''
+
 import os
 import xlsxwriter
 import time
@@ -22,12 +28,14 @@ HEADERS = {"TC Number":-1,
            "Protection Type":-1}
 FORCEHEADER = True #forces unmatched headers to have a column number.
 RUNNING = False
+OUTSIDEKILL = False
+
+MainWindow = tk.Tk()
+MainWindow.title("GradeXConvertToXLSX")
+MainWindow.protocol('WM_DELETE_WINDOW', lambda: CloseProgram(MainWindow, None))
 
 def main():
     settings = ReadSettings() #check for settings file and load.
-    MainWindow = tk.Tk()
-    MainWindow.title("GradeXConvertToXLSX")
-    
     #widget def
     config = ttk.Button(MainWindow, text="Configure", command=ShowConfig)
     textlbl = ttk.Label(MainWindow, text='Press "Run" to convert all csv output files from GradeX '
@@ -37,7 +45,7 @@ def main():
     messagelist = tk.Listbox(MainWindow)
     
     ok = ttk.Button(MainWindow, text="Run", command=lambda: RunApplication(messagelist, MainWindow))
-    close = ttk.Button(MainWindow, text="Exit", command=MainWindow.destroy)
+    close = ttk.Button(MainWindow, text="Exit", command=lambda: CloseProgram(MainWindow, messagelist))
     #widget layout
     textlbl.grid(row=0, column=1, columnspan=3)
     messagelist.grid(row=2, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W))
@@ -80,7 +88,7 @@ def ShowConfig():
     
     headerssting = ""
     firstheader = True
-    for key in HEADERS:
+    for key in sorted(HEADERS):
         if firstheader:
            firstheader = False
         else:
@@ -113,6 +121,18 @@ def ShowConfig():
     
     ConfigWindow.mainloop()
 
+def CloseProgram(window, updatebox):
+    if RUNNING:
+        global OUTSIDEKILL
+        OUTSIDEKILL = True
+        
+        if updatebox != None:
+            updatebox.insert(tk.END, "    Abortring run...")
+            updatebox.yview(tk.END)    
+            window.update()
+        
+    else:
+        window.destroy()
 
 def ConvertToXLSX(updatebox, window):
     global RUNNING
@@ -156,8 +176,12 @@ def ConvertToXLSX(updatebox, window):
                             if (row == 0):
                                 worksheet.write(row, col, header, wbheaderformat)
                             col += 1
-                            continue
-                        elif HEADERS[header] < 0:
+                        if HEADERS[header] < 0:
+                            if not lineat: #notify of bad headers at start.
+                                updateboxtext = "               WARNING!! Column \"" + header + "\" not found!" 
+                                updatebox.insert(tk.END, updateboxtext)
+                                updatebox.yview(tk.END)    
+                                window.update()
                             continue
                         
                         if row == 0:
@@ -175,6 +199,11 @@ def ConvertToXLSX(updatebox, window):
                         updatebox.insert(tk.END, updateboxtext)
                         updatebox.yview(tk.END)    
                         window.update()
+                    if OUTSIDEKILL:
+                        #kills the program if requested. This quits without saving the workbook.
+                        RUNNING = False
+                        messagebox.showinfo(title="Aborted Run", message="Run aborted, output file not complete!")
+                        return
             workbooknum += 1
             
             updateboxtext = "      Finished Processing " + filename + ", total of " + str(lineat) + " rows" 
@@ -235,7 +264,7 @@ def ReadSettings():
         globals().update(settings)
         return True
     return False
-            
+    
 if __name__ == "__main__":
     main()
         
