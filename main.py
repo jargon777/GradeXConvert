@@ -10,6 +10,7 @@ import time
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.ttk as ttk
+import tkinter.filedialog as tkf
 import json
 import threading
 
@@ -34,26 +35,43 @@ MainWindow = tk.Tk()
 MainWindow.title("GradeXConvertToXLSX")
 MainWindow.protocol('WM_DELETE_WINDOW', lambda: CloseProgram(MainWindow, None))
 
+
 def main():
+    Files = {"read": False, "write": False}
+    
     settings = ReadSettings() #check for settings file and load.
     #widget def
     config = ttk.Button(MainWindow, text="Configure", command=ShowConfig)
-    textlbl = ttk.Label(MainWindow, text='Press "Run" to convert all csv output files from GradeX '
-                            +"in this directory. \nFiles must be in the same directory as this "
-                            +"executable. "
-                            ,wraplength=550, justify=tk.LEFT, padding=(12,12,12,12))
-    messagelist = tk.Listbox(MainWindow)
+    textlbl = ttk.Label(MainWindow, text='Application Messages'
+                            ,width=75, wraplength=550, justify=tk.LEFT, padding=(12,12,12,12))
+    messagelist = tk.Listbox(MainWindow, height=3, width=70)
     
-    ok = ttk.Button(MainWindow, text="Run", command=lambda: RunApplication(messagelist, MainWindow))
-    close = ttk.Button(MainWindow, text="Exit", command=lambda: CloseProgram(MainWindow, messagelist))
+    ok = ttk.Button(MainWindow, text="Run", command=lambda: RunApplication(messagelist, MainWindow, Files))
+    close = ttk.Button(MainWindow, text="Cancel", command=lambda: CloseProgram(MainWindow, messagelist))
+    
+    brwslocR = ttk.Entry(MainWindow)
+    brwslocR.insert(0, "Please Load a GradeX Output File")
+    brwslocR.configure(state='disabled')
+    brwslocW = ttk.Entry(MainWindow)
+    brwslocW.insert(0, "Please Choose a File to Save to")
+    brwslocW.configure(state='disabled')
+    readfileB = ttk.Button(MainWindow, text="Convert...", command=lambda: askFile("read", Files, brwslocR, MainWindow))
+    writefileB = ttk.Button(MainWindow, text="Save to...", command=lambda: askFile("write", Files, brwslocW, MainWindow))
     #widget layout
-    textlbl.grid(row=0, column=1, columnspan=3)
-    messagelist.grid(row=2, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W))
-    messagelist.insert(tk.END, "Application Loaded...")
+    #textlbl.grid(row=0, column=1, columnspan=3)
+    messagelist.grid(row=2, column=1, columnspan=3, sticky=(tk.N, tk.S, tk.E, tk.W), pady=20)
+    messagelist.insert(tk.END, "GradeX Output Converter")
+    messagelist.insert(tk.END, "  Select a File to Convert...")
     
     ok.grid(row=99, column=1, pady=20)
     config.grid(row=99, column=2, pady=20)
     close.grid(row=99, column=3, pady=20)
+    
+    writefileB.grid(row=98, column=1, pady=0, sticky=(tk.E))
+    brwslocW.grid(row=98, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    readfileB.grid(row=97, column=1, pady=0, sticky=(tk.E))
+    brwslocR.grid(row=97, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    MainWindow.resizable(width=False, height=False)
     MainWindow.mainloop()
     
 
@@ -70,9 +88,9 @@ class error_catch:
             messagebox.showerror(title="Unhandled Error.", message=s)
 
 @error_catch
-def RunApplication(updatebox, window):
+def RunApplication(updatebox, window, Files):
     def callback():
-        ConvertToXLSX(updatebox, window)
+        ConvertToXLSX(updatebox, window, Files)
         
     if not RUNNING:
         updatebox.insert(tk.END, "    Converting Files...")
@@ -134,96 +152,95 @@ def CloseProgram(window, updatebox):
     else:
         window.destroy()
 
-def ConvertToXLSX(updatebox, window):
+def ConvertToXLSX(updatebox, window, files):
     global RUNNING
+    global OUTSIDEKILL
     RUNNING = True
-    writedir = "converted/"
-    date = time.strftime("%d-%m-%y")
-    workbooknum = 0
     
-    for filename in os.listdir("."):
-        if filename.endswith("csv"):
-            updateboxtext = "      Reading File " + filename 
-            updatebox.insert(tk.END, updateboxtext)
-            updatebox.yview(tk.END)    
-            window.update()
-            if not os.path.isdir(writedir):
-                os.makedirs(writedir)
-            workbookname = writedir + "GradeXConv-" + date + "-" + str(workbooknum) + ".xlsx"
-            workbook = xlsxwriter.Workbook(workbookname)
-            worksheet = workbook.add_worksheet()
-            wbheaderformat = workbook.add_format({'bold': True, 'font_color': 'white', 'bg_color': 'black'})
+    if files["read"] == False or files["read"] == None or files["write"] == None or files["write"] == False:
+        updateboxtext = "Some files not selected! Please Check!"
+        updatebox.insert(tk.END, updateboxtext)
+        updatebox.yview(tk.END)    
+        window.update()
+        RUNNING = False
+        return #don't do anything if files invalid
+    
+    filename = files["read"].name
+    files["read"].close()
+    updateboxtext = "      Reading File " + filename 
+    updatebox.insert(tk.END, updateboxtext)
+    updatebox.yview(tk.END)    
+    window.update()
+    
+    workbookname = files["write"].name
+    files["write"].close() #close the file, we just want the location.
+    workbook = xlsxwriter.Workbook(workbookname)
+    worksheet = workbook.add_worksheet()
+    wbheaderformat = workbook.add_format({'bold': True, 'font_color': 'white', 'bg_color': 'black'})
             
-            #print("Reading " + filename)
-            with open(filename, "r", encoding="utf-8-sig") as csvfile:
-                lineat = 0
-                for line in csvfile:
-                    line = line.strip("\n").split(DELIMITER)
-                    if lineat == 0: #header business
-                        index = 0
-                        for header in line:
-                            if header in HEADERS:
-                                HEADERS[header] = index
-                            index += 1
-                    else:
-                        pass
-                    
-                    #write to CSV file
-                    row = lineat
-                    col = 0
-                    for header in sorted(HEADERS):
-                        if (FORCEHEADER and HEADERS[header] < 0): #check for unmatched headers.
-                            if (row == 0):
-                                worksheet.write(row, col, header, wbheaderformat)
-                            col += 1
-                        if HEADERS[header] < 0:
-                            if not lineat: #notify of bad headers at start.
-                                updateboxtext = "               WARNING!! Column \"" + header + "\" not found!" 
-                                updatebox.insert(tk.END, updateboxtext)
-                                updatebox.yview(tk.END)    
-                                window.update()
-                            continue
-                        
-                        if row == 0:
-                            worksheet.write(row, col, line[HEADERS[header]],wbheaderformat)
-                        else:
-                            worksheet.write(row, col, line[HEADERS[header]])
-                        col += 1
+    lineat = 0
+    with open(filename, "r", encoding="utf-8-sig") as csvfile:
+        for line in csvfile:
+            line = line.strip("\n").split(DELIMITER)
+            if lineat == 0: #header business
+                index = 0
+                for header in line:
+                    if header in HEADERS:
+                        HEADERS[header] = index
+                    index += 1
+            else:
+                pass
             
-                        
-                        
-                        
-                    lineat += 1
-                    if (lineat % 5000 == 0):
-                        updateboxtext = "           Processed " + str(lineat) + " rows" 
+            #write to CSV file
+            row = lineat
+            col = 0
+            for header in sorted(HEADERS):
+                if (FORCEHEADER and HEADERS[header] < 0): #check for unmatched headers.
+                    if (row == 0):
+                        worksheet.write(row, col, header, wbheaderformat)
+                    col += 1
+                if HEADERS[header] < 0:
+                    if not lineat: #notify of bad headers at start.
+                        updateboxtext = "               WARNING!! Column \"" + header + "\" not found!" 
                         updatebox.insert(tk.END, updateboxtext)
                         updatebox.yview(tk.END)    
                         window.update()
-                    if OUTSIDEKILL:
-                        #kills the program if requested. This quits without saving the workbook.
-                        RUNNING = False
-                        messagebox.showinfo(title="Aborted Run", message="Run aborted, output file not complete!")
-                        return
-            workbooknum += 1
+                    continue
+                
+                if row == 0:
+                    worksheet.write(row, col, line[HEADERS[header]],wbheaderformat)
+                else:
+                    worksheet.write(row, col, line[HEADERS[header]])
+                col += 1
+    
+                
+                
+                
+            lineat += 1
+            if (lineat % 5000 == 0):
+                updateboxtext = "           Processed " + str(lineat) + " rows" 
+                updatebox.insert(tk.END, updateboxtext)
+                updatebox.yview(tk.END)    
+                window.update()
+            if OUTSIDEKILL:
+                #kills the program if requested. This quits without saving the workbook.
+                OUTSIDEKILL = False
+                RUNNING = False
+                messagebox.showinfo(title="Aborted Run", message="Run aborted, output file not complete!")
+                return
+        
+    #updateboxtext = "      Finished Processing " + filename + ", total of " + str(lineat) + " rows" 
+    #updatebox.insert(tk.END, updateboxtext)
+    #updatebox.yview(tk.END)    
+    #window.update()
+    
+    workbook.close()
+    
+    updateboxtext = "File converted, output saved as " + workbookname
+    updatebox.insert(tk.END, updateboxtext)
+    updatebox.yview(tk.END)    
+    window.update()
             
-            updateboxtext = "      Finished Processing " + filename + ", total of " + str(lineat) + " rows" 
-            updatebox.insert(tk.END, updateboxtext)
-            updatebox.yview(tk.END)    
-            window.update()
-            
-            workbook.close()
-            
-            updateboxtext = "      File converted, output saved as " + workbookname
-            updatebox.insert(tk.END, updateboxtext)
-            updatebox.yview(tk.END)    
-            window.update()
-            
-    mssagestring = "Failed to convert any files, check that files are in the same directory as this "
-    messagetitle = "No Files Converted!"
-    if workbooknum:
-        mssagestring = "All files Converted! \nConverted a total of " + str(workbooknum) + " files!"
-        messagetitle = "All Files Converted"
-    messagebox.showinfo(title=messagetitle, message=mssagestring)
     RUNNING = False
 
 def WriteSettings(ConfigWindow, delimiter, header, forcehead):
@@ -246,6 +263,20 @@ def WriteSettings(ConfigWindow, delimiter, header, forcehead):
     ConfigWindow.destroy()
     messagebox.showinfo(title="Configurations Saved", message='Configuration File saved as "custom-config.json"')
     
+     
+def askFile(key, fileDict, label, window):
+        #Calls a dialog box that asks the user to navigate to a folder to save localconfig.
+        if key == "read":
+            file = tkf.askopenfile("r", defaultextension=".csv", filetypes =(("GradeX Output", "*.csv"),("All Files","*.*")))
+        if key == "write":
+            file = tkf.asksaveasfile("w", defaultextension=".xlsx", filetypes =(("Microsoft Excel Table", "*.xlsx"),("All Files","*.*")))
+        if file != False and file != None:
+            fileDict[key] = file
+            label.configure(state='normal')
+            label.delete(0, tk.END)
+            label.insert(0, file.name)
+            label.configure(state='disabled')
+            window.update_idletasks()
         
 def ReadSettings():
     # read settings file and update if needed.
