@@ -165,21 +165,12 @@ def ConvertToXLSX(updatebox, window, files):
         RUNNING = False
         return #don't do anything if files invalid
     
-    ''' #old code!
-    for filename in os.listdir("."):
-        if filename.endswith("csv"):
-    '''
     filename = files["read"].name
     files["read"].close()
     updateboxtext = "      Reading File " + filename 
     updatebox.insert(tk.END, updateboxtext)
     updatebox.yview(tk.END)    
     window.update()
-    
-    ''' #old code!
-            if not os.path.isdir(writedir):
-                os.makedirs(writedir)
-    ''' 
     
     workbookname = files["write"].name
     files["write"].close() #close the file, we just want the location.
