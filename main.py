@@ -10,6 +10,7 @@ import time
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.ttk as ttk
+import tkinter.filedialog as tkf
 import json
 import threading
 
@@ -34,7 +35,10 @@ MainWindow = tk.Tk()
 MainWindow.title("GradeXConvertToXLSX")
 MainWindow.protocol('WM_DELETE_WINDOW', lambda: CloseProgram(MainWindow, None))
 
+
 def main():
+    Files = {"read": False, "write": False}
+    
     settings = ReadSettings() #check for settings file and load.
     #widget def
     config = ttk.Button(MainWindow, text="Configure", command=ShowConfig)
@@ -46,14 +50,26 @@ def main():
     
     ok = ttk.Button(MainWindow, text="Run", command=lambda: RunApplication(messagelist, MainWindow))
     close = ttk.Button(MainWindow, text="Exit", command=lambda: CloseProgram(MainWindow, messagelist))
+    
+    brwslocR = ttk.Entry(MainWindow)
+    brwslocR.insert(0, "Select a File to Open")
+    brwslocW = ttk.Entry(MainWindow)
+    brwslocW.insert(0, "Select a File to Save to")
+    readfileB = ttk.Button(MainWindow, text="Open...", command=lambda: askFile("read", Files, brwslocR, MainWindow))
+    writefileB = ttk.Button(MainWindow, text="Save to...", command=lambda: askFile("write", Files, brwslocW, MainWindow))
     #widget layout
     textlbl.grid(row=0, column=1, columnspan=3)
-    messagelist.grid(row=2, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W))
+    messagelist.grid(row=2, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W), pady=10)
     messagelist.insert(tk.END, "Application Loaded...")
     
     ok.grid(row=99, column=1, pady=20)
     config.grid(row=99, column=2, pady=20)
     close.grid(row=99, column=3, pady=20)
+    
+    writefileB.grid(row=98, column=1, pady=5)
+    brwslocW.grid(row=98, column=2, pady=5, columnspan = 2)
+    readfileB.grid(row=97, column=1, pady=5)
+    brwslocR.grid(row=97, column=2, pady=5, columnspan = 2)
     MainWindow.mainloop()
     
 
@@ -134,7 +150,7 @@ def CloseProgram(window, updatebox):
     else:
         window.destroy()
 
-def ConvertToXLSX(updatebox, window):
+def ConvertToXLSX(updatebox, window, files):
     global RUNNING
     global OUTSIDEKILL
     RUNNING = True
@@ -248,6 +264,18 @@ def WriteSettings(ConfigWindow, delimiter, header, forcehead):
     ConfigWindow.destroy()
     messagebox.showinfo(title="Configurations Saved", message='Configuration File saved as "custom-config.json"')
     
+     
+def askFile(key, fileDict, label, window):
+        #Calls a dialog box that asks the user to navigate to a folder to save localconfig.
+        if key == "read":
+            file = tkf.askopenfile("r")
+        if key == "write":
+            file = tkf.asksaveasfile("w")
+        if file != False:
+            fileDict[key] = file
+            label.delete(0, tk.END)
+            label.insert(0, file.name)
+            window.update_idletasks()
         
 def ReadSettings():
     # read settings file and update if needed.
