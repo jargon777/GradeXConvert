@@ -13,9 +13,13 @@ import tkinter.ttk as ttk
 import tkinter.filedialog as tkf
 import json
 import threading
+import csv
+from tkinter.filedialog import askdirectory
 
 CONFIGFILE = "custom-config.json"
 DELIMITER = ","
+QUOTECHAR = '"'
+'''
 HEADERS = {"TC Number":-1, 
            "Risk - Total":-1, 
            "Region":-1, 
@@ -27,35 +31,88 @@ HEADERS = {"TC Number":-1,
            "Date Inspected":-1,
            "Inspected By":-1,
            "Protection Type":-1}
+'''
+HEADERS = {"PASSIVE":{"Location Original ID":-1, "Risk - Total":-1,"Region":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Spur Mile Point":-1, "Spur":-1,"Date Inspected":-1, "Last Inspected By":-1, "Type":-1},
+           "AWS":{"Location Original ID":-1, "Risk - Total":-1,"Region":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Spur Mile Point":-1, "Spur":-1,"Date Inspected":-1, "Last Inspected By":-1, "Type":-1},
+           "WIS":{"Location Original ID":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Province":-1,"Region":-1, "Type":-1},
+           "WSS":{"Location Original ID":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Province":-1,"Region":-1, "Type":-1}
+    }
 FORCEHEADER = True #forces unmatched headers to have a column number.
 RUNNING = False
 OUTSIDEKILL = False
+
+FILETYPES = ["AWS", "PASSIVE", "WIS", "WSS", "write"]
 
 MainWindow = tk.Tk()
 MainWindow.title("GradeXConvertToXLSX")
 MainWindow.protocol('WM_DELETE_WINDOW', lambda: CloseProgram(MainWindow, None))
 
 
+class XLSWorkbook():
+    def __init__(self, file, name, firsTabName):
+        self.XLSXfile = file
+        self.name = name
+        self.worksheets = {}
+        
+        self.AddWorksheet(firsTabName)
+        
+        
+    def AddWorksheet(self, name):
+        self.worksheets[name] = XLSWorksheet(name, self.XLSXfile.add_worksheet(name), 
+             self.XLSXfile.add_format({'bold': True, 'font_color': 'white', 'bg_color': 'black'}))
+    
+    
+    def close(self):
+        self.XLSXfile.close()
+    
+class XLSWorksheet():
+    def __init__(self, tabname, worksheet, headerformat):
+        self.name = tabname
+        self.worksheet = worksheet
+        self.atRow = 0
+        self.atCol = 0
+        self.wbheaderformat = headerformat
+        
+        for header in HEADERS[tabname]:
+            worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
+            self.atCol += 1
+        
+
 def main():
-    Files = {"read": False, "write": False}
+    Files = {}
+    for name in FILETYPES:
+        Files[name] = False
     
     settings = ReadSettings() #check for settings file and load.
     #widget def
     config = ttk.Button(MainWindow, text="Configure", command=ShowConfig)
     textlbl = ttk.Label(MainWindow, text='Application Messages'
                             ,width=75, wraplength=550, justify=tk.LEFT, padding=(12,12,12,12))
-    messagelist = tk.Listbox(MainWindow, height=3, width=70)
+    messagelist = tk.Listbox(MainWindow, height=3, width=80)
     
     ok = ttk.Button(MainWindow, text="Run", command=lambda: RunApplication(messagelist, MainWindow, Files))
     close = ttk.Button(MainWindow, text="Cancel", command=lambda: CloseProgram(MainWindow, messagelist))
     
-    brwslocR = ttk.Entry(MainWindow)
-    brwslocR.insert(0, "Please Load a GradeX Output File")
-    brwslocR.configure(state='disabled')
+    brwslocAWS = ttk.Entry(MainWindow)
+    brwslocAWS.insert(0, "Please Load a AWS GradeX Output File")
+    brwslocAWS.configure(state='disabled')
+    brwslocPAS = ttk.Entry(MainWindow)
+    brwslocPAS.insert(0, "Please Load a GradeX Output File for PASSIVE Crossings")
+    brwslocPAS.configure(state='disabled')
+    brwslocWIS = ttk.Entry(MainWindow)
+    brwslocWIS.insert(0, "Please Load a WIS GradeX Output File")
+    brwslocWIS.configure(state='disabled')
+    brwslocWSS = ttk.Entry(MainWindow)
+    brwslocWSS.insert(0, "Please Load a WSS GradeX Output File")
+    brwslocWSS.configure(state='disabled')
+    
     brwslocW = ttk.Entry(MainWindow)
-    brwslocW.insert(0, "Please Choose a File to Save to")
+    brwslocW.insert(0, "Please Choose a Directory to Save all Output to")
     brwslocW.configure(state='disabled')
-    readfileB = ttk.Button(MainWindow, text="Convert...", command=lambda: askFile("read", Files, brwslocR, MainWindow))
+    readfileBAWS = ttk.Button(MainWindow, text="AWS...", command=lambda: askFile("AWS", Files, brwslocAWS, MainWindow))
+    readfileBPAS = ttk.Button(MainWindow, text="PASSIVE...", command=lambda: askFile("PASSIVE", Files, brwslocPAS, MainWindow))
+    readfileBWIS = ttk.Button(MainWindow, text="WIS...", command=lambda: askFile("WIS", Files, brwslocWIS, MainWindow))
+    readfileBWSS = ttk.Button(MainWindow, text="WSS...", command=lambda: askFile("WSS", Files, brwslocWSS, MainWindow))
     writefileB = ttk.Button(MainWindow, text="Save to...", command=lambda: askFile("write", Files, brwslocW, MainWindow))
     #widget layout
     #textlbl.grid(row=0, column=1, columnspan=3)
@@ -63,14 +120,20 @@ def main():
     messagelist.insert(tk.END, "GradeX Output Converter")
     messagelist.insert(tk.END, "  Select a File to Convert...")
     
-    ok.grid(row=99, column=1, pady=20)
-    config.grid(row=99, column=2, pady=20)
-    close.grid(row=99, column=3, pady=20)
+    ok.grid(row=99, column=1, pady=5)
+    config.grid(row=98, column=1, pady=5)
+    close.grid(row=99, column=3, pady=5)
     
-    writefileB.grid(row=98, column=1, pady=0, sticky=(tk.E))
-    brwslocW.grid(row=98, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
-    readfileB.grid(row=97, column=1, pady=0, sticky=(tk.E))
-    brwslocR.grid(row=97, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    writefileB.grid(row=90, column=1, pady=20, sticky=(tk.E))
+    brwslocW.grid(row=90, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    readfileBAWS.grid(row=86, column=1, pady=0, sticky=(tk.E))
+    brwslocAWS.grid(row=86, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    readfileBPAS.grid(row=87, column=1, pady=0, sticky=(tk.E))
+    brwslocPAS.grid(row=87, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    readfileBWIS.grid(row=88, column=1, pady=0, sticky=(tk.E))
+    brwslocWIS.grid(row=88, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    readfileBWSS.grid(row=89, column=1, pady=0, sticky=(tk.E))
+    brwslocWSS.grid(row=89, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
     MainWindow.resizable(width=False, height=False)
     MainWindow.mainloop()
     
@@ -152,70 +215,73 @@ def CloseProgram(window, updatebox):
     else:
         window.destroy()
 
-def ConvertToXLSX(updatebox, window, files):
-    global RUNNING
+def _CheckFiles(files, filename):
+    if files[filename] == False or files[filename] == None: #check that files exist
+        return -1
+    if filename not in HEADERS and filename != "write": #check that headers are defined for file.
+        return -2
+    return 1
+
+def _ProcessFiles(updatebox, window, files, name, workbooks):
+    Data = {}
+    filename = files[name].name
     global OUTSIDEKILL
-    RUNNING = True
     
-    if files["read"] == False or files["read"] == None or files["write"] == None or files["write"] == False:
-        updateboxtext = "Some files not selected! Please Check!"
-        updatebox.insert(tk.END, updateboxtext)
-        updatebox.yview(tk.END)    
-        window.update()
-        RUNNING = False
-        return #don't do anything if files invalid
-    
-    filename = files["read"].name
-    files["read"].close()
-    updateboxtext = "      Reading File " + filename 
-    updatebox.insert(tk.END, updateboxtext)
-    updatebox.yview(tk.END)    
-    window.update()
-    
-    workbookname = files["write"].name
-    files["write"].close() #close the file, we just want the location.
-    workbook = xlsxwriter.Workbook(workbookname)
-    worksheet = workbook.add_worksheet()
-    wbheaderformat = workbook.add_format({'bold': True, 'font_color': 'white', 'bg_color': 'black'})
-            
     lineat = 0
+
     with open(filename, "r", encoding="utf-8-sig") as csvfile:
-        for line in csvfile:
-            line = line.strip("\n").split(DELIMITER)
+        csvrd = csv.reader(csvfile, delimiter=DELIMITER, quotechar=QUOTECHAR)
+        for line in csvrd:
+            #line = line.strip("\n").split(DELIMITER)
             if lineat == 0: #header business
                 index = 0
+                #figure out the location of all the headers.
                 for header in line:
-                    if header in HEADERS:
-                        HEADERS[header] = index
+                    if header in HEADERS[name]:
+                        HEADERS[name][header] = index
                     index += 1
-            else:
-                pass
+                    
+                for header in sorted(HEADERS[name]): #check if all headers matched
+                    if HEADERS[name][header] < 0:
+                        updateboxtext = "               WARNING!! Column \"" + header + "\" not found in file " + filename + "! " 
+                        if header == "Region": updateboxtext+= "\n                 Region is required to build the files! Unable to process file!"
+                        updatebox.insert(tk.END, updateboxtext)
+                        updatebox.yview(tk.END)
+                        window.update()
+                        if header == "Region" : return #important header, terminate
+                        continue
+                lineat += 1
+                continue #read the next line of the file.
+            #write to CSV file            
             
-            #write to CSV file
-            row = lineat
-            col = 0
-            for header in sorted(HEADERS):
-                if (FORCEHEADER and HEADERS[header] < 0): #check for unmatched headers.
+            workbookname = line[HEADERS[name]["Region"]]
+            if workbookname == "" or workbookname == None:
+                updateboxtext = "               Row #" + str(lineat) + " has no Region!"
+                updatebox.insert(tk.END, updateboxtext)
+                updatebox.yview(tk.END)
+                continue
+            
+            if not workbookname in workbooks:
+                wbn = files["write"] + "/" + workbookname + ".xslx"
+                wbf = xlsxwriter.Workbook(wbn)
+                workbooks[workbookname] = XLSWorkbook(wbf, workbookname, name) 
+            
+            '''
+            for header in sorted(HEADERS[name]):
+                if (FORCEHEADER and HEADERS[name][header] < 0): #check for unmatched headers.
                     if (row == 0):
                         worksheet.write(row, col, header, wbheaderformat)
                     col += 1
-                if HEADERS[header] < 0:
-                    if not lineat: #notify of bad headers at start.
-                        updateboxtext = "               WARNING!! Column \"" + header + "\" not found!" 
-                        updatebox.insert(tk.END, updateboxtext)
-                        updatebox.yview(tk.END)    
-                        window.update()
-                    continue
                 
                 if row == 0:
-                    worksheet.write(row, col, line[HEADERS[header]],wbheaderformat)
+                    worksheet.write(row, col, line[HEADERS[name][header]],wbheaderformat)
                 else:
-                    worksheet.write(row, col, line[HEADERS[header]])
+                    worksheet.write(row, col, line[HEADERS[name][header]])
                 col += 1
     
                 
                 
-                
+            '''    
             lineat += 1
             if (lineat % 5000 == 0):
                 updateboxtext = "           Processed " + str(lineat) + " rows" 
@@ -234,14 +300,56 @@ def ConvertToXLSX(updatebox, window, files):
     #updatebox.yview(tk.END)    
     #window.update()
     
-    workbook.close()
+def ConvertToXLSX(updatebox, window, files):
+    global RUNNING
+    global OUTSIDEKILL
+    global FILETYPES
+    RUNNING = True
+    workbooks = {} #where we store the active workbooks as we write too them.
     
-    updateboxtext = "File converted, output saved as " + workbookname
-    updatebox.insert(tk.END, updateboxtext)
-    updatebox.yview(tk.END)    
-    window.update()
+    try:            
+        for name in FILETYPES:
+            i = _CheckFiles(files, name)
+            if i != 1: #error detected
+                if i == -1:
+                    updateboxtext = "Some files not selected! Please Check!"
+                elif i == -2:
+                    updateboxtext = "Configuration files are not correct! Please Check!"
+                else:
+                    updateboxtext = "General error while checking validity of files!"
+                updatebox.insert(tk.END, updateboxtext)
+                updatebox.yview(tk.END)    
+                window.update()
+                return #don't do anything if files invalid
+                
             
-    RUNNING = False
+        
+        for name in FILETYPES: #iterate through the files
+            if name == "write": continue
+            filename = files[name].name
+            files[name].close()
+            updateboxtext = "      Reading File " + filename 
+            updatebox.insert(tk.END, updateboxtext)
+            updatebox.yview(tk.END)    
+            window.update()
+            _ProcessFiles(updatebox, window, files, name, workbooks) #load all files into memory
+            
+        
+        
+        updateboxtext = "File converted, output saved to " + files["write"]
+        updatebox.insert(tk.END, updateboxtext)
+        updatebox.yview(tk.END)    
+        window.update()
+    except:
+        raise
+    finally:
+        #close all the workbooks (if any) open
+        RUNNING = False
+        if len(workbooks) > 0:
+            for wbname in workbooks:
+                workbooks[wbname].close()
+            
+            
 
 def WriteSettings(ConfigWindow, delimiter, header, forcehead):
     global DELIMITER
@@ -265,18 +373,21 @@ def WriteSettings(ConfigWindow, delimiter, header, forcehead):
     
      
 def askFile(key, fileDict, label, window):
-        #Calls a dialog box that asks the user to navigate to a folder to save localconfig.
-        if key == "read":
-            file = tkf.askopenfile("r", defaultextension=".csv", filetypes =(("GradeX Output", "*.csv"),("All Files","*.*")))
-        if key == "write":
-            file = tkf.asksaveasfile("w", defaultextension=".xlsx", filetypes =(("Microsoft Excel Table", "*.xlsx"),("All Files","*.*")))
-        if file != False and file != None:
-            fileDict[key] = file
-            label.configure(state='normal')
-            label.delete(0, tk.END)
-            label.insert(0, file.name)
-            label.configure(state='disabled')
-            window.update_idletasks()
+    global FILETYPES
+    #Calls a dialog box that asks the user to navigate to a folder to save localconfig.
+    if key == "write":
+        #file = tkf.asksaveasfile("w", defaultextension=".xlsx", filetypes =(("Microsoft Excel Table", "*.xlsx"),("All Files","*.*")))
+        file = tkf.askdirectory()
+    elif key in FILETYPES:
+        file = tkf.askopenfile("r", defaultextension=".csv", filetypes =(("GradeX Output", "*.csv"),("All Files","*.*")))
+    if file != False and file != None:
+        fileDict[key] = file
+        fname = file.name if key != "write" else file
+        label.configure(state='normal')
+        label.delete(0, tk.END)
+        label.insert(0, fname)
+        label.configure(state='disabled')
+        window.update_idletasks()
         
 def ReadSettings():
     # read settings file and update if needed.
