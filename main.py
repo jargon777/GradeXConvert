@@ -3,10 +3,10 @@ Created on Nov 18, 2016
 
 @author: Matthew Muresan
 ''' 
-
+import traceback
 import os
 import xlsxwriter
-import time
+import datetime
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.ttk as ttk
@@ -22,19 +22,6 @@ from difflib import get_close_matches
 CONFIGFILE = "custom-config.json"
 DELIMITER = ","
 QUOTECHAR = '"'
-'''
-HEADERS = {"TC Number"] = -1, 
-           "Risk - Total"] = -1, 
-           "Region"] = -1, 
-           "RWY (group)"] = -1,
-           "Mile"] = -1,
-           "Subdivision Name"] = -1,
-           "Spur Mile"] = -1,
-           "Spur Name"] = -1,
-           "Date Inspected"] = -1,
-           "Inspected By"] = -1,
-           "Protection Type"] = -1}
-'''
 HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict()}
 HEADERS["PASSIVE"]["Location Original ID"] = -1
 HEADERS["PASSIVE"]["Risk - Total"] = -1
@@ -73,17 +60,32 @@ HEADERS["WSS"]["Province"] = -1
 HEADERS["WSS"]["Region"] = -1
 HEADERS["WSS"]["Type"] = -1
 
+FILENAMEPREPEND = ""
+
+SUMMATIONCOL = "Railway (group)"
+SUMMATIONDO = True
+
+PROVINCEREMAP = {"Ont.":"ON", "Man.":"MB", "B.C.":"BC", "Que.":"QC", "N.B.":"NB", "N.S.":"NS", 
+                 "P.E.I.":"PE", "Sask.":"SK", "Man.":"MN", "Nun.":"NU", "N.W.T.":"NT", 
+                 "Nfld.":"NL", "Yuk.":"YT", "Yukn.":"YT"}
+
+PROVINCEPOSTALCONV = True # converts provinces to postal abbreviations
 FORCEHEADER = True #forces unmatched headers to have a column number.
 RUNNING = False
 OUTSIDEKILL = False
 
+ALLOWPARTIALFILE = False
+
 FUZZYMATCHING = True #will attempt to match missing headers.
+FUZZYLIMIT = 0.6 #the fuzzy level
 
 FILETYPES = ["AWS", "PASSIVE", "WIS", "WSS", "write"]
 
 MainWindow = tk.Tk()
 MainWindow.title("GradeXConvertToXLSX")
 MainWindow.protocol('WM_DELETE_WINDOW', lambda: CloseProgram(MainWindow, None))
+
+WARNINGS = False
 
 
 class XLSWorkbook():
@@ -97,9 +99,12 @@ class XLSWorkbook():
         
     def AddWorksheet(self, name):
         self.worksheets[name] = XLSWorksheet(name, self.XLSXfile.add_worksheet(name), 
-             self.XLSXfile.add_format({'bold': True, 'font_color': 'white', 'bg_color': 'black'}))
+             self.XLSXfile.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#C5D9F1'}))
         
     def WriteLine(self, headers, line, tab):
+        if PROVINCEPOSTALCONV and "Province" in headers and headers["Province"] > 0: #convert the province labesl
+            if line[headers["Province"]] in PROVINCEREMAP:
+                 line[headers["Province"]] = PROVINCEREMAP[line[headers["Province"]]]
         for header in headers: #iterate through the headers and assemble what needs to be written
             if not tab in self.worksheets: #if the tab doesn't exist make it.
                 self.AddWorksheet(tab)
@@ -117,14 +122,46 @@ class XLSWorksheet():
         self.worksheet = worksheet
         self.atRow = 0
         self.atCol = 0
+        self.maxCol = 0
+        self.summationRWYcol = None
         self.wbheaderformat = headerformat
         
         for header in HEADERS[tabname]:
             self.worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
+            if header == SUMMATIONCOL:
+                self.summationRWYcol = chr(65 + self.atCol) #store the letter of the column
             self.atCol += 1
+        
+        self.maxCol = self.atCol
+        
+        if SUMMATIONDO: self.writeSummation()        
         
         self.nextRow()
     
+    def writeSummation(self):
+        Trow = 0
+        Tcol = self.maxCol + 2 #skip a column
+        summations = ["CN", "CP"]
+        
+        self.worksheet.write(Trow, Tcol, "RWY", self.wbheaderformat)
+        self.worksheet.write(Trow, Tcol + 1, self.name, self.wbheaderformat)
+        
+        for summation in summations:
+            Trow += 1
+            sumfor = "=COUNTIF(" + self.summationRWYcol + ":" + self.summationRWYcol + "," + chr(65 + Tcol) + str(Trow + 1) + ")"
+            self.worksheet.write(Trow, Tcol, summation)
+            self.worksheet.write(Trow, Tcol + 1, sumfor)
+            
+        Trow += 1
+        sumfor = "= " + (chr(65 + Tcol + 1) + str(Trow + 2 + 1) + " - (" + chr(65 + Tcol + 1) + str(Trow - 2 + 1) + " + " 
+                  + chr(65 + Tcol + 1) + str(Trow - 1 + 1) + ")") 
+        self.worksheet.write(Trow, Tcol, "Other")
+        self.worksheet.write(Trow, Tcol + 1, sumfor)
+        
+        Trow += 2 #skip two rows to write the GT
+        sumfor = "=COUNTA(" + self.summationRWYcol + ":" + self.summationRWYcol + ") - 1"
+        self.worksheet.write(Trow, Tcol, "Total")
+        self.worksheet.write(Trow, Tcol + 1, sumfor)
     def nextRow(self):
         self.atRow += 1
         self.atCol = 0 #advance and reset the rows.
@@ -143,10 +180,10 @@ def main():
     config = ttk.Button(MainWindow, text="Configure", command=ShowConfig)
     textlbl = ttk.Label(MainWindow, text='Application Messages'
                             ,width=75, wraplength=550, justify=tk.LEFT, padding=(12,12,12,12))
-    messagelist = tk.Listbox(MainWindow, height=3, width=80)
+    messagelist = tk.Listbox(MainWindow, height=8, width=100)
     
     ok = ttk.Button(MainWindow, text="Run", command=lambda: RunApplication(messagelist, MainWindow, Files))
-    close = ttk.Button(MainWindow, text="Cancel", command=lambda: CloseProgram(MainWindow, messagelist))
+    close = ttk.Button(MainWindow, text="Close", command=lambda: CloseProgram(MainWindow, messagelist))
     
     brwslocAWS = ttk.Entry(MainWindow)
     brwslocAWS.insert(0, "Please Load a AWS GradeX Output File")
@@ -173,7 +210,8 @@ def main():
     #textlbl.grid(row=0, column=1, columnspan=3)
     messagelist.grid(row=2, column=1, columnspan=3, sticky=(tk.N, tk.S, tk.E, tk.W), pady=20)
     messagelist.insert(tk.END, "GradeX Output Converter")
-    messagelist.insert(tk.END, "  Select a File to Convert...")
+    if not settings: messagelist.insert(tk.END, "  Select a File to Convert...")
+    else: messagelist.insert(tk.END, "  Custom settings loaded! Select a file to convert...")
     
     ok.grid(row=99, column=1, pady=5)
     config.grid(row=98, column=1, pady=5)
@@ -232,28 +270,18 @@ def ShowConfig():
         headerssting += key
     forcedhead = tk.IntVar()   
     forcedhead.set(FORCEHEADER) 
-    
-    delimiterlbl = ttk.Label(ConfigWindow, text="Delimiter used in input file:", justify=tk.CENTER, padding=(12,12,12,0))
-    headerstolbl = ttk.Label(ConfigWindow, text="Comma Separated List of Headers to Keep in Output File. \nThese should match EXACTLY those in the GradeX file. \nRestore Defaults by Deleting the custom-config.json file.", justify=tk.CENTER, padding=(12,24,12,0))
-    forceheadlbl = ttk.Label(ConfigWindow, text="Include requested headers even if they can't be matched to one in the input file? \n(All row entries will be blank)", justify=tk.CENTER, padding=(12,24,12,0))
-    delimiterent = ttk.Entry(ConfigWindow, width=5)
-    delimiterent.insert(0, DELIMITER)
-    headerstoent = ttk.Entry(ConfigWindow, width=75, text=headerssting)
-    headerstoent.insert(0, headerssting)
-    forceheadent = ttk.Checkbutton(ConfigWindow, variable=forcedhead)
-    ok = ttk.Button(ConfigWindow, text="Save", command=lambda: WriteSettings(ConfigWindow, delimiterent.get(), headerstoent.get(), forcedhead.get()))
+
+    headerstolbl = ttk.Label(ConfigWindow, text="Press 'Export' to export the existing settings to a configurable file. \n Configuration files are automatically loaded when you re-load the program. \n Press 'Load' to refresh the settings if you've made changes to the custom configuration file. \nRestore defaults by deleting the custom-config.json file in the program's directory", justify=tk.CENTER, padding=(12,24,12,0))
+    ok = ttk.Button(ConfigWindow, text="Export Settings to File", command=lambda: WriteSettings(ConfigWindow))
+    load = ttk.Button(ConfigWindow, text="Load New Settings File", command=lambda: ReadSettings(ConfigWindow, True))
     close = ttk.Button(ConfigWindow, text="Close", command=ConfigWindow.destroy)
     
     
-    delimiterlbl.grid(row=1, column=1, columnspan=2)
-    delimiterent.grid(row=2, column=1, columnspan=2)
     headerstolbl.grid(row=3, column=1, columnspan=2)
-    headerstoent.grid(row=4, column=1, columnspan=2, padx = 20)
-    forceheadlbl.grid(row=5, column=1, columnspan=2)
-    forceheadent.grid(row=6, column=1, columnspan=2)
     
-    ok.grid(row=55, column=1, pady=20)
-    close.grid(row=55, column=2, pady=20)
+    ok.grid(row=54, column=1, pady=20)
+    close.grid(row=55, column=2, pady=10)
+    load.grid(row = 54, column = 2, pady = 10)
     
     ConfigWindow.mainloop()
 
@@ -278,7 +306,8 @@ def _CheckFiles(files, filename):
     return 1
 
 def _ProcessFiles(updatebox, window, files, name, workbooks):
-    Data = {}
+    now = datetime.datetime.now()
+    now = now.strftime("OUTPUT %Y-%m-%d %H%M %S")
     filename = files[name].name
     global OUTSIDEKILL
     
@@ -299,15 +328,17 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 for header in sorted(HEADERS[name]): #check if all headers matched
                     if HEADERS[name][header] < 0:
                         updateboxtext = "               WARNING!! Column \"" + header + "\" not found in file " + filename + "! " 
-                        if header == "Region": updateboxtext+= "\n                 Region is required to build the files! Unable to process file!"
+                        if header == "Region": updateboxtext+= "Region is required to build the files! Unable to process file!"
+                        WriteWarnings(updateboxtext)
                         updatebox.insert(tk.END, updateboxtext)
                         updatebox.yview(tk.END)
                         window.update()
                         if FUZZYMATCHING: #If fuzzy matching enabled, try to match to something close
-                            fuzzymatch = get_close_matches(header, line)
+                            fuzzymatch = get_close_matches(header, line, n=1, cutoff=FUZZYLIMIT)
                             if len(fuzzymatch) > 0:
                                 HEADERS[name][header] = line.index(fuzzymatch[0])
-                                updateboxtext += "                 " + header + "column not found! Using closest match " + fuzzymatch[0]
+                                updateboxtext = "                 " + header + " column not found! Using closest match " + fuzzymatch[0]
+                                WriteWarnings(updateboxtext)
                                 updatebox.insert(tk.END, updateboxtext)
                                 updatebox.yview(tk.END)
                                 window.update()
@@ -320,35 +351,20 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
             workbookname = line[HEADERS[name]["Region"]]
             if workbookname == "" or workbookname == None:
                 updateboxtext = "               Row #" + str(lineat) + " has no Region!"
+                WriteWarnings(updateboxtext)
                 updatebox.insert(tk.END, updateboxtext)
                 updatebox.yview(tk.END)
                 continue
             
             if not workbookname in workbooks:
-                wbn = files["write"] + "/" + workbookname + ".xlsx"
+                if not os.path.exists(files["write"] + "/" + now):
+                    os.makedirs(files["write"] + "/" + now)
+                wbn = files["write"] + "/" + now + "/" + FILENAMEPREPEND + workbookname + ".xlsx"
                 wbf = xlsxwriter.Workbook(wbn)
                 workbooks[workbookname] = XLSWorkbook(wbf, workbookname, name) 
 
             workbooks[workbookname].WriteLine(HEADERS[name], line, name)
-                
-                    
-            
-            '''
-            for header in sorted(HEADERS[name]):
-                if (FORCEHEADER and HEADERS[name][header] < 0): #check for unmatched headers.
-                    if (row == 0):
-                        worksheet.write(row, col, header, wbheaderformat)
-                    col += 1
-                
-                if row == 0:
-                    worksheet.write(row, col, line[HEADERS[name][header]],wbheaderformat)
-                else:
-                    worksheet.write(row, col, line[HEADERS[name][header]])
-                col += 1
-    
-                
-                
-            '''    
+ 
             lineat += 1
             if (lineat % 5000 == 0):
                 updateboxtext = "           Processed " + str(lineat) + " rows" 
@@ -371,19 +387,26 @@ def ConvertToXLSX(updatebox, window, files):
     global RUNNING
     global OUTSIDEKILL
     global FILETYPES
+    global WARNINGS
     RUNNING = True
     workbooks = {} #where we store the active workbooks as we write too them.
-    
     try:            
         for name in FILETYPES:
             i = _CheckFiles(files, name)
             if i != 1: #error detected
                 if i == -1:
-                    updateboxtext = "Some files not selected! Please Check!"
+                    if ALLOWPARTIALFILE and name != "write":
+                        updateboxtext = "WARNING! File " + name + " not included!"
+                        WriteWarnings(updateboxtext)
+                        updatebox.insert(tk.END, updateboxtext)
+                        updatebox.yview(tk.END)  
+                        continue
+                    else:
+                        updateboxtext = "File '" + name + "' not selected. No data processed!"
                 elif i == -2:
-                    updateboxtext = "Configuration files are not correct! Please Check!"
+                    updateboxtext = "Configuration files are not correct. No data processed!"
                 else:
-                    updateboxtext = "General error while checking validity of files!"
+                    updateboxtext = "General error while checking validity of files, No data processed!"
                 updatebox.insert(tk.END, updateboxtext)
                 updatebox.yview(tk.END)    
                 window.update()
@@ -393,6 +416,7 @@ def ConvertToXLSX(updatebox, window, files):
         
         for name in FILETYPES: #iterate through the files
             if name == "write": continue
+            if files[name] == False: continue #skip if missing
             filename = files[name].name
             files[name].close()
             updateboxtext = "      Reading File " + filename 
@@ -407,32 +431,66 @@ def ConvertToXLSX(updatebox, window, files):
         updatebox.insert(tk.END, updateboxtext)
         updatebox.yview(tk.END)    
         window.update()
-    except:
+    except Exception as e:
+        ShowErrors(str(e))
+        with open("error.log", 'w') as errfile:
+            str(traceback.print_exc(file=errfile))
         raise
     finally:
         #close all the workbooks (if any) open
         RUNNING = False
+        if WARNINGS:
+            messagebox.showinfo(title="An Exception Occured!", message='Some warnings were raised! Please review the message log or see "warn.log" for mor information')
+            WARNINGS = False
         if len(workbooks) > 0:
             for wbname in workbooks:
                 workbooks[wbname].close()
             
-            
+def WriteWarnings(text):
+    global WARNINGS
+    WARNINGS = True
+    with open("warn.log", "a") as warnf:
+        warnf.write("at " + str(datetime.datetime.now()) + "\n" + text)
+        warnf.write("\n\n")        
 
-def WriteSettings(ConfigWindow, delimiter, header, forcehead):
+def ShowErrors(errorT):
+    messagebox.showinfo(title="An Exception Occured!", message='An error occured while processing files... the error text was: \n' + errorT + "\n\nSee error.log for more information")
+    
+
+def WriteSettings(ConfigWindow):
     global DELIMITER
+    global QUOTECHAR
+    global SUMMATIONCOL
+    global PROVINCEREMAP
+    global PROVINCEPOSTALCONV
     global HEADERS
     global FORCEHEADER
-    DELIMITER = delimiter
+    global FUZZYMATCHING
+    global FUZZYLIMIT
     
-    header = header.split(",")
-    HEADERS = {}
-    for item in header:
-        HEADERS[item] = -1
+    comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca",
+                "DELIMTER": "The delimiter used to separate values in the input CSV file.",
+                "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
+                "HEADERS": "The headers included in the input files. This setting has two levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. Column labels that you want included must take the form 'NAME': -1. Existing headers can be renamed.", 
+                "FORCEHEADER": "Boolean. If a suitable match for the column can't be found, then should the column be kept?",
+                "FUZZYMATCHING": "Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.",
+                "FUZZYLIMIT": "Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.",
+                "SUMMATIONCOL": "Name of the column to use when generating the RWY sums",
+                "SUMMATIONDO": "Boolean. Whether or not the summation statistics are written to the excel file",
+                "PROVINCEPOSTALCONV": "Boolean. Whether or not the program will try to convert the province names from non-standard abbreviations to postal abbreviations",
+                "PROVINCEPREMAP": "The names that are converted, in format 'Abbreviation : Postal Abbreviation'. Values matching 'Abbreviuation' will be converted to 'Postal Abbreviation'",
+                "FILENAMEPREPEND": "This text is prepended to the filenames of the workbooks written, e.g. if it is set to 'test' then the AWS workbook will be 'testAWS.xlsx'. These names are not santized, and invalid characters will throw a file name error on execution.",
+                "ALLOWPARTIALFILE": "Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided." }
     
-    FORCEHEADER = forcehead
+    for key in HEADERS:
+        for item in HEADERS[key]:
+            HEADERS[key][item] = -1
     
     with open(CONFIGFILE, "w") as configfile:
-        settings = {"DELIMITER":DELIMITER, "HEADERS":HEADERS,"FORCEHEADER":FORCEHEADER}
+        settings = {"DELIMITER":DELIMITER, "QUOTECHAR":QUOTECHAR, "HEADERS":HEADERS,"FORCEHEADER":FORCEHEADER,
+                    "FUZZYMATCHING":FUZZYMATCHING, "SUMMATIONCOL":SUMMATIONCOL, "PROVINCEREMAP":PROVINCEREMAP, 
+                    "PROVINCEPOSTALCONV":PROVINCEPOSTALCONV, "FUZZYLIMIT":FUZZYLIMIT, "SUMMATIONDO":SUMMATIONDO,
+                    "FILENAMEPREPEND":FILENAMEPREPEND, "ALLOWPARTIALFILE":ALLOWPARTIALFILE, "1-INSTRUCTIONS":comments}
         json.dump(settings, configfile, sort_keys=True, indent = 4)
     
     ConfigWindow.destroy()
@@ -456,7 +514,7 @@ def askFile(key, fileDict, label, window):
         label.configure(state='disabled')
         window.update_idletasks()
         
-def ReadSettings():
+def ReadSettings(ConfigWindow=None, Message=False):
     # read settings file and update if needed.
     if os.path.isfile(CONFIGFILE):
         with open(CONFIGFILE, "r") as configfile:
@@ -464,13 +522,36 @@ def ReadSettings():
                 settings = json.load(configfile)
                 if "DELIMITER" in settings:
                     DELIMITER = settings["DELIMITER"]
+                if "QUOTECHAR" in settings:
+                    QUOTECHAR = settings["QUOTECHAR"]
                 if "HEADERS" in settings:
                     HEADERS = settings["HEADERS"]
                 if "FORCEHEADER" in settings:
                     FORCEHEADER = settings["FORCEHEADER"]
+                if "FUZZYMATCHING" in settings:
+                    FUZZYMATCHING = settings["FUZZYMATCHING"]
+                if "FUZZYLIMIT" in settings:
+                    FUZZYLIMIT = settings["FUZZYLIMIT"]
+                if "SUMMATIONCOL" in settings:
+                    SUMMATIONCOL = settings["SUMMATIONCOL"]
+                if "PROVINCEPOSTALCONV" in settings:
+                    PROVINCEPOSTALCONV = settings["PROVINCEPOSTALCONV"]
+                if "PROVINCEREMAP" in settings:
+                    PROVINCEREMAP = settings["PROVINCEREMAP"]
+                if "SUMMATIONCOL" in settings:
+                    SUMMATIONCOL = settings["SUMMATIONCOL"]
+                if "SUMMATIONDO" in settings:
+                    SUMMATIONDO = settings["SUMMATIONDO"]
+                if "FILENAMEPREPEND" in settings:
+                    FILENAMEPREPEND = settings["FILENAMEPREPEND"]
+                if "ALLOWPARTIALFILE" in settings:
+                    ALLOWPARTIALFILE = settings["ALLOWPARTIALFILE"]
             except:
                 raise
         globals().update(settings)
+        if Message and ConfigWindow != None: 
+            ConfigWindow.destroy()
+            messagebox.showinfo(title="Configurations Saved", message='Configuration file ' + str(CONFIGFILE) + " loaded!")
         return True
     return False
     
