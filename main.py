@@ -13,33 +13,71 @@ import tkinter.ttk as ttk
 import tkinter.filedialog as tkf
 import json
 import threading
+import difflib
 import csv
+import collections
 from tkinter.filedialog import askdirectory
+from difflib import get_close_matches
 
 CONFIGFILE = "custom-config.json"
 DELIMITER = ","
 QUOTECHAR = '"'
 '''
-HEADERS = {"TC Number":-1, 
-           "Risk - Total":-1, 
-           "Region":-1, 
-           "RWY (group)":-1,
-           "Mile":-1,
-           "Subdivision Name":-1,
-           "Spur Mile":-1,
-           "Spur Name":-1,
-           "Date Inspected":-1,
-           "Inspected By":-1,
-           "Protection Type":-1}
+HEADERS = {"TC Number"] = -1, 
+           "Risk - Total"] = -1, 
+           "Region"] = -1, 
+           "RWY (group)"] = -1,
+           "Mile"] = -1,
+           "Subdivision Name"] = -1,
+           "Spur Mile"] = -1,
+           "Spur Name"] = -1,
+           "Date Inspected"] = -1,
+           "Inspected By"] = -1,
+           "Protection Type"] = -1}
 '''
-HEADERS = {"PASSIVE":{"Location Original ID":-1, "Risk - Total":-1,"Region":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Spur Mile Point":-1, "Spur":-1,"Date Inspected":-1, "Last Inspected By":-1, "Type":-1},
-           "AWS":{"Location Original ID":-1, "Risk - Total":-1,"Region":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Spur Mile Point":-1, "Spur":-1,"Date Inspected":-1, "Last Inspected By":-1, "Type":-1},
-           "WIS":{"Location Original ID":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Province":-1,"Region":-1, "Type":-1},
-           "WSS":{"Location Original ID":-1, "Railway (group)":-1,"Subdivision Mile Point":-1,"Subdivision":-1, "Province":-1,"Region":-1, "Type":-1}
-    }
+HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict()}
+HEADERS["PASSIVE"]["Location Original ID"] = -1
+HEADERS["PASSIVE"]["Risk - Total"] = -1
+HEADERS["PASSIVE"]["Region"] = -1
+HEADERS["PASSIVE"]["Railway (group)"] = -1
+HEADERS["PASSIVE"]["Subdivision Mile Point"] = -1
+HEADERS["PASSIVE"]["Subdivision"] = -1
+HEADERS["PASSIVE"]["Spur Mile Point"] = -1
+HEADERS["PASSIVE"]["Spur"] = -1
+HEADERS["PASSIVE"]["Last  Inspection Date"] = -1
+HEADERS["PASSIVE"]["Last  Inspection By"] = -1
+HEADERS["PASSIVE"]["Type"] = -1
+HEADERS["AWS"]["Location Original ID"] = -1
+HEADERS["AWS"]["Risk - Total"] = -1
+HEADERS["AWS"]["Region"] = -1
+HEADERS["AWS"]["Railway (group)"] = -1
+HEADERS["AWS"]["Subdivision Mile Point"] = -1
+HEADERS["AWS"]["Subdivision"] = -1
+HEADERS["AWS"]["Spur Mile Point"] = -1
+HEADERS["AWS"]["Spur"] = -1
+HEADERS["AWS"]["Last  Inspection Date"] = -1
+HEADERS["AWS"]["Last  Inspection By"] = -1
+HEADERS["AWS"]["Type"] = -1
+HEADERS["WIS"]["Location Original ID"] = -1
+HEADERS["WIS"]["Railway (group)"] = -1
+HEADERS["WIS"]["Subdivision Mile Point"] = -1
+HEADERS["WIS"]["Subdivision"] = -1
+HEADERS["WIS"]["Province"] = -1
+HEADERS["WIS"]["Region"] = -1
+HEADERS["WIS"]["Type"] = -1
+HEADERS["WSS"]["Location Original ID"] = -1
+HEADERS["WSS"]["Railway (group)"] = -1
+HEADERS["WSS"]["Subdivision Mile Point"] = -1
+HEADERS["WSS"]["Subdivision"] = -1
+HEADERS["WSS"]["Province"] = -1
+HEADERS["WSS"]["Region"] = -1
+HEADERS["WSS"]["Type"] = -1
+
 FORCEHEADER = True #forces unmatched headers to have a column number.
 RUNNING = False
 OUTSIDEKILL = False
+
+FUZZYMATCHING = True #will attempt to match missing headers.
 
 FILETYPES = ["AWS", "PASSIVE", "WIS", "WSS", "write"]
 
@@ -60,8 +98,16 @@ class XLSWorkbook():
     def AddWorksheet(self, name):
         self.worksheets[name] = XLSWorksheet(name, self.XLSXfile.add_worksheet(name), 
              self.XLSXfile.add_format({'bold': True, 'font_color': 'white', 'bg_color': 'black'}))
-    
-    
+        
+    def WriteLine(self, headers, line, tab):
+        for header in headers: #iterate through the headers and assemble what needs to be written
+            if not tab in self.worksheets: #if the tab doesn't exist make it.
+                self.AddWorksheet(tab)
+            if not headers[header] < 0:
+                self.worksheets[tab].writeCell(line[headers[header]])
+            
+        self.worksheets[tab].nextRow()
+            
     def close(self):
         self.XLSXfile.close()
     
@@ -74,9 +120,18 @@ class XLSWorksheet():
         self.wbheaderformat = headerformat
         
         for header in HEADERS[tabname]:
-            worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
+            self.worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
             self.atCol += 1
         
+        self.nextRow()
+    
+    def nextRow(self):
+        self.atRow += 1
+        self.atCol = 0 #advance and reset the rows.
+        
+    def writeCell(self, item):
+        self.worksheet.write(self.atRow, self.atCol, item)
+        self.atCol += 1
 
 def main():
     Files = {}
@@ -248,6 +303,14 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                         updatebox.insert(tk.END, updateboxtext)
                         updatebox.yview(tk.END)
                         window.update()
+                        if FUZZYMATCHING: #If fuzzy matching enabled, try to match to something close
+                            fuzzymatch = get_close_matches(header, line)
+                            if len(fuzzymatch) > 0:
+                                HEADERS[name][header] = line.index(fuzzymatch[0])
+                                updateboxtext += "                 " + header + "column not found! Using closest match " + fuzzymatch[0]
+                                updatebox.insert(tk.END, updateboxtext)
+                                updatebox.yview(tk.END)
+                                window.update()
                         if header == "Region" : return #important header, terminate
                         continue
                 lineat += 1
@@ -262,9 +325,13 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 continue
             
             if not workbookname in workbooks:
-                wbn = files["write"] + "/" + workbookname + ".xslx"
+                wbn = files["write"] + "/" + workbookname + ".xlsx"
                 wbf = xlsxwriter.Workbook(wbn)
                 workbooks[workbookname] = XLSWorkbook(wbf, workbookname, name) 
+
+            workbooks[workbookname].WriteLine(HEADERS[name], line, name)
+                
+                    
             
             '''
             for header in sorted(HEADERS[name]):
