@@ -77,7 +77,7 @@ OUTSIDEKILL = False
 ALLOWPARTIALFILE = False
 
 FUZZYMATCHING = True #will attempt to match missing headers.
-FUZZYLIMIT = 0.6 #the fuzzy level
+FUZZYLIMIT = 0.8 #the fuzzy level
 
 FILETYPES = ["AWS", "PASSIVE", "WIS", "WSS", "write"]
 
@@ -313,7 +313,8 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
     
     lineat = 0
 
-    with open(filename, "r", encoding="utf-8-sig") as csvfile:
+    #with open(filename, "r", encoding="utf-8-sig") as csvfile:
+    with open(filename, "r") as csvfile:
         csvrd = csv.reader(csvfile, delimiter=DELIMITER, quotechar=QUOTECHAR)
         for line in csvrd:
             #line = line.strip("\n").split(DELIMITER)
