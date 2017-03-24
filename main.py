@@ -22,9 +22,9 @@ from difflib import get_close_matches
 CONFIGFILE = "custom-config.json"
 DELIMITER = ","
 QUOTECHAR = '"'
-HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict()}
+HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict(), "RANK": collections.OrderedDict()}
 HEADERS["PASSIVE"]["Location Original ID"] = -1
-HEADERS["PASSIVE"]["Risk - Total"] = -1
+HEADERS["PASSIVE"]["Risk - Rank"] = -1
 HEADERS["PASSIVE"]["Region"] = -1
 HEADERS["PASSIVE"]["Railway (group)"] = -1
 HEADERS["PASSIVE"]["Subdivision Mile Point"] = -1
@@ -35,7 +35,7 @@ HEADERS["PASSIVE"]["Last  Inspection Date"] = -1
 HEADERS["PASSIVE"]["Last  Inspection By"] = -1
 HEADERS["PASSIVE"]["Type"] = -1
 HEADERS["AWS"]["Location Original ID"] = -1
-HEADERS["AWS"]["Risk - Total"] = -1
+HEADERS["AWS"]["Risk - Rank"] = -1
 HEADERS["AWS"]["Region"] = -1
 HEADERS["AWS"]["Railway (group)"] = -1
 HEADERS["AWS"]["Subdivision Mile Point"] = -1
@@ -59,11 +59,41 @@ HEADERS["WSS"]["Subdivision"] = -1
 HEADERS["WSS"]["Province"] = -1
 HEADERS["WSS"]["Region"] = -1
 HEADERS["WSS"]["Type"] = -1
+HEADERS["RANK"]["Rank"] = -1
+HEADERS["RANK"]["LocID"] = -1
+HEADERS["RANK"]["TC Number"] = -1
+HEADERS["RANK"]["Railway"] = -1
+HEADERS["RANK"]["Region"] = -1
+HEADERS["RANK"]["Province"] = -1
+HEADERS["RANK"]["Access"] = -1
+HEADERS["RANK"]["Mile"] = -1
+HEADERS["RANK"]["Subdivision"] = -1
+HEADERS["RANK"]["Spur Mile"] = -1
+HEADERS["RANK"]["Spur Name"] = -1
+HEADERS["RANK"]["Location"] = -1
+HEADERS["RANK"]["Latitude"] = -1
+HEADERS["RANK"]["Longitude"] = -1
+HEADERS["RANK"]["HWY No"] = -1
+HEADERS["RANK"]["Municipality"] = -1
+HEADERS["RANK"]["Road Authority"] = -1
+HEADERS["RANK"]["Protection"] = -1
+HEADERS["RANK"]["Accident"] = -1
+HEADERS["RANK"]["Fatality"] = -1
+HEADERS["RANK"]["Injury"] = -1
+HEADERS["RANK"]["Freight Trains Daily"] = -1
+HEADERS["RANK"]["Passenger Trains Daily"] = -1
+HEADERS["RANK"]["Vehicles Daily"] = -1
+HEADERS["RANK"]["Train Max Speed (mph)"] = -1
+HEADERS["RANK"]["Road Speed (km/h)"] = -1
+HEADERS["RANK"]["Lanes"] = -1
+HEADERS["RANK"]["Tracks"] = -1
+HEADERS["RANK"]["Urban Y/N"] = -1
 
 FILENAMEPREPEND = ""
 
 SUMMATIONCOL = "Railway (group)"
 SUMMATIONDO = True
+NOSUMMATION = ["RANK"]
 
 PROVINCEREMAP = {"Ont.":"ON", "Man.":"MB", "B.C.":"BC", "Que.":"QC", "N.B.":"NB", "N.S.":"NS", 
                  "P.E.I.":"PE", "Sask.":"SK", "Man.":"MN", "Nun.":"NU", "N.W.T.":"NT", 
@@ -74,12 +104,12 @@ FORCEHEADER = True #forces unmatched headers to have a column number.
 RUNNING = False
 OUTSIDEKILL = False
 
-ALLOWPARTIALFILE = False
+ALLOWPARTIALFILE = True
 
 FUZZYMATCHING = True #will attempt to match missing headers.
-FUZZYLIMIT = 0.8 #the fuzzy level
+FUZZYLIMIT = 0.75 #the fuzzy level
 
-FILETYPES = ["AWS", "PASSIVE", "WIS", "WSS", "write"]
+FILETYPES = ["AWS", "PASSIVE", "WIS", "WSS", "RANK", "write"]
 
 MainWindow = tk.Tk()
 MainWindow.title("GradeXConvertToXLSX")
@@ -134,7 +164,7 @@ class XLSWorksheet():
         
         self.maxCol = self.atCol
         
-        if SUMMATIONDO: self.writeSummation()        
+        if SUMMATIONDO and not self.name in NOSUMMATION: self.writeSummation()        
         
         self.nextRow()
     
@@ -197,6 +227,9 @@ def main():
     brwslocWSS = ttk.Entry(MainWindow)
     brwslocWSS.insert(0, "Please Load a WSS GradeX Output File")
     brwslocWSS.configure(state='disabled')
+    brwslocLST = ttk.Entry(MainWindow)
+    brwslocLST.insert(0, "Please Load a List Ranking File")
+    brwslocLST.configure(state='disabled')
     
     brwslocW = ttk.Entry(MainWindow)
     brwslocW.insert(0, "Please Choose a Directory to Save all Output to")
@@ -205,7 +238,10 @@ def main():
     readfileBPAS = ttk.Button(MainWindow, text="PASSIVE...", command=lambda: askFile("PASSIVE", Files, brwslocPAS, MainWindow))
     readfileBWIS = ttk.Button(MainWindow, text="WIS...", command=lambda: askFile("WIS", Files, brwslocWIS, MainWindow))
     readfileBWSS = ttk.Button(MainWindow, text="WSS...", command=lambda: askFile("WSS", Files, brwslocWSS, MainWindow))
+    readfileBLST = ttk.Button(MainWindow, text="List...", command=lambda: askFile("RANK", Files, brwslocLST, MainWindow))
     writefileB = ttk.Button(MainWindow, text="Save to...", command=lambda: askFile("write", Files, brwslocW, MainWindow))
+    
+    notelabel = ttk.Label(MainWindow, text="Note: \n\nOmitted files will not \nbe included in the final export.", justify=tk.CENTER, padding=(12,24,12,0))
     #widget layout
     #textlbl.grid(row=0, column=1, columnspan=3)
     messagelist.grid(row=2, column=1, columnspan=3, sticky=(tk.N, tk.S, tk.E, tk.W), pady=20)
@@ -217,6 +253,7 @@ def main():
     config.grid(row=98, column=1, pady=5)
     close.grid(row=99, column=3, pady=5)
     
+    notelabel.grid(row=86, column=1, columnspan = 1, rowspan = 3, sticky=(tk.W))
     writefileB.grid(row=90, column=1, pady=20, sticky=(tk.E))
     brwslocW.grid(row=90, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
     readfileBAWS.grid(row=86, column=1, pady=0, sticky=(tk.E))
@@ -227,6 +264,8 @@ def main():
     brwslocWIS.grid(row=88, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
     readfileBWSS.grid(row=89, column=1, pady=0, sticky=(tk.E))
     brwslocWSS.grid(row=89, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
+    readfileBLST.grid(row=85, column=1, pady=0, sticky=(tk.E))
+    brwslocLST.grid(row=85, column=2, pady=0, columnspan = 2, sticky=(tk.E, tk.W))
     MainWindow.resizable(width=False, height=False)
     MainWindow.mainloop()
     
@@ -313,7 +352,6 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
     
     lineat = 0
 
-    #with open(filename, "r", encoding="utf-8-sig") as csvfile:
     with open(filename, "r") as csvfile:
         csvrd = csv.reader(csvfile, delimiter=DELIMITER, quotechar=QUOTECHAR)
         for line in csvrd:
@@ -462,6 +500,7 @@ def WriteSettings(ConfigWindow):
     global DELIMITER
     global QUOTECHAR
     global SUMMATIONCOL
+    global NOSUMMATION
     global PROVINCEREMAP
     global PROVINCEPOSTALCONV
     global HEADERS
@@ -478,6 +517,7 @@ def WriteSettings(ConfigWindow):
                 "FUZZYLIMIT": "Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.",
                 "SUMMATIONCOL": "Name of the column to use when generating the RWY sums",
                 "SUMMATIONDO": "Boolean. Whether or not the summation statistics are written to the excel file",
+                "NOSUMMATION": "List. If SUMMATIONDO is set to True, then these tabs will NOT get a summation box.",
                 "PROVINCEPOSTALCONV": "Boolean. Whether or not the program will try to convert the province names from non-standard abbreviations to postal abbreviations",
                 "PROVINCEPREMAP": "The names that are converted, in format 'Abbreviation : Postal Abbreviation'. Values matching 'Abbreviuation' will be converted to 'Postal Abbreviation'",
                 "FILENAMEPREPEND": "This text is prepended to the filenames of the workbooks written, e.g. if it is set to 'test' then the AWS workbook will be 'testAWS.xlsx'. These names are not santized, and invalid characters will throw a file name error on execution.",
@@ -491,7 +531,7 @@ def WriteSettings(ConfigWindow):
         settings = {"DELIMITER":DELIMITER, "QUOTECHAR":QUOTECHAR, "HEADERS":HEADERS,"FORCEHEADER":FORCEHEADER,
                     "FUZZYMATCHING":FUZZYMATCHING, "SUMMATIONCOL":SUMMATIONCOL, "PROVINCEREMAP":PROVINCEREMAP, 
                     "PROVINCEPOSTALCONV":PROVINCEPOSTALCONV, "FUZZYLIMIT":FUZZYLIMIT, "SUMMATIONDO":SUMMATIONDO,
-                    "FILENAMEPREPEND":FILENAMEPREPEND, "ALLOWPARTIALFILE":ALLOWPARTIALFILE, "1-INSTRUCTIONS":comments}
+                    "NOSUMMATION":NOSUMMATION, "FILENAMEPREPEND":FILENAMEPREPEND, "ALLOWPARTIALFILE":ALLOWPARTIALFILE, "1-INSTRUCTIONS":comments}
         json.dump(settings, configfile, sort_keys=True, indent = 4)
     
     ConfigWindow.destroy()
@@ -543,6 +583,8 @@ def ReadSettings(ConfigWindow=None, Message=False):
                     SUMMATIONCOL = settings["SUMMATIONCOL"]
                 if "SUMMATIONDO" in settings:
                     SUMMATIONDO = settings["SUMMATIONDO"]
+                if "NOSUMMATION" in settings:
+                    NOSUMMATION = settings["NOSUMMATION"]
                 if "FILENAMEPREPEND" in settings:
                     FILENAMEPREPEND = settings["FILENAMEPREPEND"]
                 if "ALLOWPARTIALFILE" in settings:
