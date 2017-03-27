@@ -23,71 +23,71 @@ CONFIGFILE = "custom-config.json"
 DELIMITER = ","
 QUOTECHAR = '"'
 HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict(), "RANK": collections.OrderedDict()}
-HEADERS["PASSIVE"]["Location Original ID"] = -1
-HEADERS["PASSIVE"]["Risk - Rank"] = -1
-HEADERS["PASSIVE"]["Region"] = -1
-HEADERS["PASSIVE"]["Railway (group)"] = -1
-HEADERS["PASSIVE"]["Subdivision Mile Point"] = -1
-HEADERS["PASSIVE"]["Subdivision"] = -1
-HEADERS["PASSIVE"]["Spur Mile Point"] = -1
-HEADERS["PASSIVE"]["Spur"] = -1
-HEADERS["PASSIVE"]["Last  Inspection Date"] = -1
-HEADERS["PASSIVE"]["Last  Inspection By"] = -1
-HEADERS["PASSIVE"]["Type"] = -1
-HEADERS["AWS"]["Location Original ID"] = -1
-HEADERS["AWS"]["Risk - Rank"] = -1
-HEADERS["AWS"]["Region"] = -1
-HEADERS["AWS"]["Railway (group)"] = -1
-HEADERS["AWS"]["Subdivision Mile Point"] = -1
-HEADERS["AWS"]["Subdivision"] = -1
-HEADERS["AWS"]["Spur Mile Point"] = -1
-HEADERS["AWS"]["Spur"] = -1
-HEADERS["AWS"]["Last  Inspection Date"] = -1
-HEADERS["AWS"]["Last  Inspection By"] = -1
-HEADERS["AWS"]["Type"] = -1
-HEADERS["WIS"]["Location Original ID"] = -1
-HEADERS["WIS"]["Railway (group)"] = -1
-HEADERS["WIS"]["Subdivision Mile Point"] = -1
-HEADERS["WIS"]["Subdivision"] = -1
-HEADERS["WIS"]["Province"] = -1
-HEADERS["WIS"]["Region"] = -1
-HEADERS["WIS"]["Type"] = -1
-HEADERS["WSS"]["Location Original ID"] = -1
-HEADERS["WSS"]["Railway (group)"] = -1
-HEADERS["WSS"]["Subdivision Mile Point"] = -1
-HEADERS["WSS"]["Subdivision"] = -1
-HEADERS["WSS"]["Province"] = -1
-HEADERS["WSS"]["Region"] = -1
-HEADERS["WSS"]["Type"] = -1
-HEADERS["RANK"]["Rank"] = -1
-HEADERS["RANK"]["LocID"] = -1
-HEADERS["RANK"]["TC Number"] = -1
-HEADERS["RANK"]["Railway"] = -1
-HEADERS["RANK"]["Region"] = -1
-HEADERS["RANK"]["Province"] = -1
-HEADERS["RANK"]["Access"] = -1
-HEADERS["RANK"]["Mile"] = -1
-HEADERS["RANK"]["Subdivision"] = -1
-HEADERS["RANK"]["Spur Mile"] = -1
-HEADERS["RANK"]["Spur Name"] = -1
-HEADERS["RANK"]["Location"] = -1
-HEADERS["RANK"]["Latitude"] = -1
-HEADERS["RANK"]["Longitude"] = -1
-HEADERS["RANK"]["HWY No"] = -1
-HEADERS["RANK"]["Municipality"] = -1
-HEADERS["RANK"]["Road Authority"] = -1
-HEADERS["RANK"]["Protection"] = -1
-HEADERS["RANK"]["Accident"] = -1
-HEADERS["RANK"]["Fatality"] = -1
-HEADERS["RANK"]["Injury"] = -1
-HEADERS["RANK"]["Freight Trains Daily"] = -1
-HEADERS["RANK"]["Passenger Trains Daily"] = -1
-HEADERS["RANK"]["Vehicles Daily"] = -1
-HEADERS["RANK"]["Train Max Speed (mph)"] = -1
-HEADERS["RANK"]["Road Speed (km/h)"] = -1
-HEADERS["RANK"]["Lanes"] = -1
-HEADERS["RANK"]["Tracks"] = -1
-HEADERS["RANK"]["Urban Y/N"] = -1
+HEADERS["PASSIVE"]["Location Original ID"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Risk - Rank"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Region"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Railway (group)"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Subdivision Mile Point"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Subdivision"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Spur Mile Point"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Spur"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Last  Inspection Date"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Last  Inspection By"]= {"pos": -1, "remap":False }
+HEADERS["PASSIVE"]["Type"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Location Original ID"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Risk - Rank"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Region"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Railway (group)"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Subdivision Mile Point"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Subdivision"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Spur Mile Point"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Spur"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Last  Inspection Date"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Last  Inspection By"]= {"pos": -1, "remap":False }
+HEADERS["AWS"]["Type"]= {"pos": -1, "remap":False }
+HEADERS["WIS"]["Location Original ID"]= {"pos": -1, "remap": }
+HEADERS["WIS"]["Railway (group)"]= {"pos": -1, "remap":False }
+HEADERS["WIS"]["Subdivision Mile Point"]= {"pos": -1, "remap":False }
+HEADERS["WIS"]["Subdivision"]= {"pos": -1, "remap":False }
+HEADERS["WIS"]["Province"]= {"pos": -1, "remap":False }
+HEADERS["WIS"]["Region"]= {"pos": -1, "remap":False }
+HEADERS["WIS"]["Type"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Location Original ID"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Railway (group)"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Subdivision Mile Point"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Subdivision"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Province"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Region"]= {"pos": -1, "remap":False }
+HEADERS["WSS"]["Type"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Rank"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["LocID"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["TC Number"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Railway"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Region"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Province"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Access"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Mile"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Subdivision"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Spur Mile"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Spur Name"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Location"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Latitude"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Longitude"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["HWY No"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Municipality"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Road Authority"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Protection"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Accident"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Fatality"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Injury"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Freight Trains Daily"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Passenger Trains Daily"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Vehicles Daily"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Train Max Speed (mph)"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Road Speed (km/h)"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Lanes"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Tracks"]= {"pos": -1, "remap":False }
+HEADERS["RANK"]["Urban Y/N"]= {"pos": -1, "remap":False }
 
 FILENAMEPREPEND = ""
 
@@ -132,14 +132,14 @@ class XLSWorkbook():
              self.XLSXfile.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#C5D9F1'}))
         
     def WriteLine(self, headers, line, tab):
-        if PROVINCEPOSTALCONV and "Province" in headers and headers["Province"] > 0: #convert the province labesl
-            if line[headers["Province"]] in PROVINCEREMAP:
-                 line[headers["Province"]] = PROVINCEREMAP[line[headers["Province"]]]
+        if PROVINCEPOSTALCONV and "Province" in headers and headers["Province"]["pos"] > 0: #convert the province labesl
+            if line[headers["Province"]["pos"]] in PROVINCEREMAP:
+                 line[headers["Province"]["pos"]] = PROVINCEREMAP[line[headers["Province"]["pos"]]]
         for header in headers: #iterate through the headers and assemble what needs to be written
             if not tab in self.worksheets: #if the tab doesn't exist make it.
                 self.AddWorksheet(tab)
-            if not headers[header] < 0:
-                self.worksheets[tab].writeCell(line[headers[header]])
+            if not headers[header]["pos"] < 0:
+                self.worksheets[tab].writeCell(line[headers[header]["pos"]])
             
         self.worksheets[tab].nextRow()
             
@@ -156,8 +156,12 @@ class XLSWorksheet():
         self.summationRWYcol = None
         self.wbheaderformat = headerformat
         
+        #write header
         for header in HEADERS[tabname]:
-            self.worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
+            if HEADERS[tabname][header]["remap"] != False:
+                self.worksheet.write(self.atRow, self.atCol, HEADERS[tabname][header]["remap"], self.wbheaderformat)
+            else:
+                self.worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
             if header == SUMMATIONCOL:
                 self.summationRWYcol = chr(65 + self.atCol) #store the letter of the column
             self.atCol += 1
@@ -361,11 +365,11 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 #figure out the location of all the headers.
                 for header in line:
                     if header in HEADERS[name]:
-                        HEADERS[name][header] = index
+                        HEADERS[name][header]["pos"] = index
                     index += 1
                     
                 for header in sorted(HEADERS[name]): #check if all headers matched
-                    if HEADERS[name][header] < 0:
+                    if HEADERS[name][header]["pos"] < 0:
                         updateboxtext = "               WARNING!! Column \"" + header + "\" not found in file " + filename + "! " 
                         if header == "Region": updateboxtext+= "Region is required to build the files! Unable to process file!"
                         WriteWarnings(updateboxtext)
@@ -375,7 +379,7 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                         if FUZZYMATCHING: #If fuzzy matching enabled, try to match to something close
                             fuzzymatch = get_close_matches(header, line, n=1, cutoff=FUZZYLIMIT)
                             if len(fuzzymatch) > 0:
-                                HEADERS[name][header] = line.index(fuzzymatch[0])
+                                HEADERS[name][header]["pos"] = line.index(fuzzymatch[0])
                                 updateboxtext = "                 " + header + " column not found! Using closest match " + fuzzymatch[0]
                                 WriteWarnings(updateboxtext)
                                 updatebox.insert(tk.END, updateboxtext)
@@ -387,7 +391,7 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 continue #read the next line of the file.
             #write to CSV file            
             
-            workbookname = line[HEADERS[name]["Region"]]
+            workbookname = line[HEADERS[name]["Region"]["pos"]]
             if workbookname == "" or workbookname == None:
                 updateboxtext = "               Row #" + str(lineat) + " has no Region!"
                 WriteWarnings(updateboxtext)
@@ -511,7 +515,7 @@ def WriteSettings(ConfigWindow):
     comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca",
                 "DELIMTER": "The delimiter used to separate values in the input CSV file.",
                 "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
-                "HEADERS": "The headers included in the input files. This setting has two levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. Column labels that you want included must take the form 'NAME': -1. Existing headers can be renamed.", 
+                "HEADERS": "The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'remap': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.", 
                 "FORCEHEADER": "Boolean. If a suitable match for the column can't be found, then should the column be kept?",
                 "FUZZYMATCHING": "Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.",
                 "FUZZYLIMIT": "Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.",
@@ -525,7 +529,7 @@ def WriteSettings(ConfigWindow):
     
     for key in HEADERS:
         for item in HEADERS[key]:
-            HEADERS[key][item] = -1
+            HEADERS[key][item]["pos"] = -1
     
     with open(CONFIGFILE, "w") as configfile:
         settings = {"DELIMITER":DELIMITER, "QUOTECHAR":QUOTECHAR, "HEADERS":HEADERS,"FORCEHEADER":FORCEHEADER,

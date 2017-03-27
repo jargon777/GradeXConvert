@@ -29,8 +29,7 @@ Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means mor
 Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.
 
 ###HEADERS 
-The headers included in the input files. This setting has two levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. Column labels that you want included must take the form 'NAME': -1. Existing headers can be renamed.
-
+The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'remap': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.
 ###PROVINCEPOSTALCONV 
 
 Boolean. Whether or not the program will try to convert the province names from non-standard abbreviations to postal abbreviations
@@ -45,4 +44,7 @@ Name of the column to use when generating the RWY sums
 
 ###SUMMATIONDO 
 Boolean. Whether or not the summation statistics are written to the excel file
+
+###ALLOWPARTIALFILE
+Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.
 
