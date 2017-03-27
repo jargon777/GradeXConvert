@@ -1,0 +1,159 @@
+at 2017-03-27 11:48:49.183447
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/InspectionListMap_data.csv! 
+
+at 2017-03-27 11:48:49.185451
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 11:48:49.193452
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/Passive.csv! 
+
+at 2017-03-27 11:48:49.195436
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 11:48:49.536437
+               WARNING!! Column "Accident" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.538437
+               WARNING!! Column "Fatality" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.541436
+               WARNING!! Column "Injury" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.543437
+               WARNING!! Column "Location" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.546436
+               WARNING!! Column "Mile" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.552441
+               WARNING!! Column "Regulator" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.555436
+               WARNING!! Column "Road Authority #1" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.558437
+                 Road Authority #1 column not found! Using closest match Road  Authority  #1
+
+at 2017-03-27 11:48:49.561440
+               WARNING!! Column "Road Speed (km/h)" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.563437
+               WARNING!! Column "Spur Mile" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.565439
+                 Spur Mile column not found! Using closest match Spur Mile Point
+
+at 2017-03-27 11:48:49.567441
+               WARNING!! Column "Spur Name" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.569440
+               WARNING!! Column "TC Number" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.572440
+               WARNING!! Column "Train Max Speed (mph)" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.574437
+               WARNING!! Column "Trains Daily" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.576437
+                 Trains Daily column not found! Using closest match Total Trains Daily
+
+at 2017-03-27 11:48:49.579436
+               WARNING!! Column "Urban/Rural" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 11:48:49.582437
+               WARNING!! Column "Vehicles Daily" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.127453
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/InspectionListMap_data.csv! 
+
+at 2017-03-27 12:48:29.129445
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 12:48:29.138450
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/Passive.csv! 
+
+at 2017-03-27 12:48:29.140436
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 12:48:29.520438
+               WARNING!! Column "Accident" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.522436
+               WARNING!! Column "Fatality" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.525438
+               WARNING!! Column "Injury" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.527438
+               WARNING!! Column "Location" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.529437
+               WARNING!! Column "Spur Name" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.532436
+               WARNING!! Column "TC Number" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.534436
+               WARNING!! Column "Train Max Speed (mph)" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.536437
+               WARNING!! Column "Trains Daily" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.539436
+                 Trains Daily column not found! Using closest match Total Trains Daily
+
+at 2017-03-27 12:48:29.542438
+               WARNING!! Column "Urban/Rural" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 12:48:29.544436
+               WARNING!! Column "Vehicles Daily" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 14:33:54.038447
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/InspectionListMap_data.csv! 
+
+at 2017-03-27 14:33:54.039446
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 14:33:54.050438
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/Passive.csv! 
+
+at 2017-03-27 14:33:54.051440
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 14:33:54.364439
+               WARNING!! Column "Accident" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 14:33:54.366441
+               WARNING!! Column "Fatality" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 14:33:54.368441
+               WARNING!! Column "Injury" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 14:33:54.369438
+               WARNING!! Column "Location" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 14:33:54.371439
+               WARNING!! Column "Train Max Speed (mph)" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 15:40:13.868451
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/InspectionListMap_data.csv! 
+
+at 2017-03-27 15:40:13.869452
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 15:40:13.877454
+               WARNING!! Column "Last  Inspection By" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/Passive.csv! 
+
+at 2017-03-27 15:40:13.879451
+                 Last  Inspection By column not found! Using closest match Last  Inspection Date
+
+at 2017-03-27 15:40:14.277450
+               WARNING!! Column "Accident #" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 15:40:14.278451
+               WARNING!! Column "Fatalities" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
+at 2017-03-27 15:40:14.280450
+               WARNING!! Column "Total Injuries" not found in file C:/Users/Matthew Muresan/git/GradeXConvert/3/RiskRank_data.csv! 
+
