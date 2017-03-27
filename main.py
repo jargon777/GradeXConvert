@@ -60,32 +60,32 @@ HEADERS["WSS"]["Province"]= {"pos": -1, "alias":False }
 HEADERS["WSS"]["Region"]= {"pos": -1, "alias":False }
 HEADERS["WSS"]["Type"]= {"pos": -1, "alias": "Road NameHighway #" }
 #HEADERS["RANK"]["Rank"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["TC Number"]= {"pos": -1, "alias":"TC CrossingID" }
+HEADERS["RANK"]["TC  Crossing ID"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Railway"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Region"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Province"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Access"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["Regulator"]= {"pos": -1, "alias":"Jurisdiction" }
-HEADERS["RANK"]["Mile"]= {"pos": -1, "alias":"Subdivision Mile Point" }
+HEADERS["RANK"]["Jurisdiction"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Subdivision"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["Spur Mile"]= {"pos": -1, "alias":"Spur Mile Point" }
-HEADERS["RANK"]["Spur Name"]= {"pos": -1, "alias":"Spur" }
+HEADERS["RANK"]["Spur Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Spur"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Location"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Latitude"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Longitude"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["Road Authority #1"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Road  Authority  #1"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["AWS Protection"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Passive Protection"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Accident"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Injury"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Fatality"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["Trains Daily"]= {"pos": -1, "alias":"Latest Train Traffic: Total # TrainPer Day" }
-HEADERS["RANK"]["Train Max Speed (mph)"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["Tracks"]= {"pos": -1, "alias":"Geometry:# Tracks" }
-HEADERS["RANK"]["Vehicles Daily"]= {"pos": -1, "alias":"Latest Vehicle Traffic:# Vehicles Per Day" }
-HEADERS["RANK"]["Road Speed (km/h)"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Total Trains Daily"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Latest Train Traffic: Overall Maximum Speed (MPH) for Rail Approach from Left"]= {"pos": -1, "alias":"Train Max Speed (mph)" }
+HEADERS["RANK"]["Tracks"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Latest Vehicle Traffic: # Vehicles Per Day"]= {"pos": -1, "alias":"Vehicles Daily"}
+HEADERS["RANK"]["Max Road Speed"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Lanes"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["Urban/Rural"]= {"pos": -1, "alias":"Road Class 1" }
+HEADERS["RANK"]["IsUrban"]= {"pos": -1, "alias":False }
 
 FILENAMEPREPEND = ""
 
@@ -513,7 +513,7 @@ def WriteSettings(ConfigWindow):
     comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca",
                 "DELIMTER": "The delimiter used to separate values in the input CSV file.",
                 "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
-                "HEADERS": "The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'remap': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.", 
+                "HEADERS": "The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'alias': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.", 
                 "FORCEHEADER": "Boolean. If a suitable match for the column can't be found, then should the column be kept?",
                 "FUZZYMATCHING": "Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.",
                 "FUZZYLIMIT": "Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.",
