@@ -13,38 +13,39 @@ Configuration must be done manually through a JSON file. A number of options can
 ### ALLOWPARTIALFILE
 Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.
 
-###DELIMTER 
+### DELIMTER 
 The delimiter used to separate values in the input CSV file.
 
-###FILENAMEPREPEND 
+### FILENAMEPREPEND 
 This text is prepended to the filenames of the workbooks written, e.g. if it is set to 'test' then the AWS workbook will be 'testAWS.xlsx'. These names are not santized, and invalid characters will throw a file name error on execution.
 
-###FORCEHEADER 
+### FORCEHEADER 
 Boolean. If a suitable match for the column can't be found, then should the column be kept?
 
-###FUZZYLIMIT 
+### FUZZYLIMIT 
 Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.
 
-###FUZZYMATCHING 
+### FUZZYMATCHING 
 Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.
 
-###HEADERS 
+### HEADERS 
 The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'remap': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.
-###PROVINCEPOSTALCONV 
 
+### PROVINCEPOSTALCONV 
 Boolean. Whether or not the program will try to convert the province names from non-standard abbreviations to postal abbreviations
-###PROVINCEPREMAP 
+
+### PROVINCEPREMAP 
 The names that are converted, in format 'Abbreviation : Postal Abbreviation'. Values matching 'Abbreviuation' will be converted to 'Postal Abbreviation'
 
-###QUOTECHAR 
+### QUOTECHAR 
 The quoting used to group together values that the delimiter in them in the input CSV file.
 
-###SUMMATIONCOL 
+### SUMMATIONCOL 
 Name of the column to use when generating the RWY sums
 
-###SUMMATIONDO 
+### SUMMATIONDO 
 Boolean. Whether or not the summation statistics are written to the excel file
 
-###ALLOWPARTIALFILE
+### ALLOWPARTIALFILE
 Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.
 
