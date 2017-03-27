@@ -23,6 +23,75 @@ CONFIGFILE = "custom-config.json"
 DELIMITER = ","
 QUOTECHAR = '"'
 HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict(), "RANK": collections.OrderedDict()}
+<<<<<<< HEAD
+HEADERS["PASSIVE"]["Location Original ID"]= {"pos": -1, "alias":"TC Crossing ID" }
+HEADERS["PASSIVE"]["Risk - Total"]= {"pos": -1, "alias":False }
+HEADERS["PASSIVE"]["Region"]= {"pos": -1, "alias":False }
+HEADERS["PASSIVE"]["Railway"]= {"pos": -1, "alias":False }
+HEADERS["PASSIVE"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["PASSIVE"]["Subdivision"]= {"pos": -1, "alias":False }
+HEADERS["PASSIVE"]["Spur Mile Point"]= {"pos": -1, "alias":False}
+HEADERS["PASSIVE"]["Spur"]= {"pos": -1, "alias":False }
+HEADERS["PASSIVE"]["Last  Inspection Date"]= {"pos": -1, "alias":"Last InspectionDate" }
+HEADERS["PASSIVE"]["Last  Inspection By"]= {"pos": -1, "alias":"Last InspectionBy" }
+HEADERS["PASSIVE"]["ProtectionType"]= {"pos": -1, "alias": "Passive Protection" }
+HEADERS["AWS"]["Location Original ID"]= {"pos": -1, "alias":"TC Crossing ID" }
+HEADERS["AWS"]["Risk - Total"]= {"pos": -1, "alias":False }
+HEADERS["AWS"]["Region"]= {"pos": -1, "alias":False }
+HEADERS["AWS"]["Railway"]= {"pos": -1, "alias":False }
+HEADERS["AWS"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["AWS"]["Subdivision"]= {"pos": -1, "alias": False }
+HEADERS["AWS"]["Spur Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["AWS"]["Spur"]= {"pos": -1, "alias":False }
+HEADERS["AWS"]["Last  Inspection Date"]= {"pos": -1, "alias":"Last Inspection Date" }
+HEADERS["AWS"]["Last  Inspection By"]= {"pos": -1, "alias":"Last Inspection By" }
+HEADERS["AWS"]["ProtectionType"]= {"pos": -1, "alias":"AWSP rotection" }
+HEADERS["WIS"]["Location Original ID"]= {"pos": -1, "alias":"Transport Canada WIS ID" }
+HEADERS["WIS"]["Railway"]= {"pos": -1, "alias":False }
+HEADERS["WIS"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["WIS"]["Subdivision"]= {"pos": -1, "alias":False }
+HEADERS["WIS"]["Province"]= {"pos": -1, "alias":False }
+HEADERS["WIS"]["Region"]= {"pos": -1, "alias":False }
+HEADERS["WIS"]["Type"]= {"pos": -1, "alias": False}
+HEADERS["WSS"]["Location Original ID"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Railway"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Subdivision"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Province"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Region"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Type"]= {"pos": -1, "alias": "Road NameHighway #" }
+#HEADERS["RANK"]["Rank"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["TC  Crossing ID"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Railway"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Region"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Province"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Access"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Jurisdiction"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Subdivision"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Spur Mile Point"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Spur"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["RSIG  Location ID"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Latitude"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Longitude"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Road  Authority  #1"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["AWS Protection"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Passive Protection"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Accident #"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Total Injuries"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Fatalities"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Total Trains Daily"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Latest Train Traffic: Overall Maximum Speed (MPH) for Rail Approach from Left"]= {"pos": -1, "alias":"Train Max Speed (mph)" }
+HEADERS["RANK"]["Tracks"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Latest Vehicle Traffic: # Vehicles Per Day"]= {"pos": -1, "alias":"Vehicles Daily"}
+HEADERS["RANK"]["Max Road Speed"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Lanes"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["IsUrban"]= {"pos": -1, "alias":False }
+
+FILENAMEPREPEND = ""
+
+SUMMATIONCOL = "Railway"
+=======
 HEADERS["PASSIVE"]["Location Original ID"] = -1
 HEADERS["PASSIVE"]["Risk - Rank"] = -1
 HEADERS["PASSIVE"]["Region"] = -1
@@ -92,6 +161,7 @@ HEADERS["RANK"]["Urban Y/N"] = -1
 FILENAMEPREPEND = ""
 
 SUMMATIONCOL = "Railway (group)"
+>>>>>>> master
 SUMMATIONDO = True
 NOSUMMATION = ["RANK"]
 
@@ -132,6 +202,16 @@ class XLSWorkbook():
              self.XLSXfile.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#C5D9F1'}))
         
     def WriteLine(self, headers, line, tab):
+<<<<<<< HEAD
+        if PROVINCEPOSTALCONV and "Province" in headers and headers["Province"]["pos"] > 0: #convert the province labesl
+            if line[headers["Province"]["pos"]] in PROVINCEREMAP:
+                 line[headers["Province"]["pos"]] = PROVINCEREMAP[line[headers["Province"]["pos"]]]
+        for header in headers: #iterate through the headers and assemble what needs to be written
+            if not tab in self.worksheets: #if the tab doesn't exist make it.
+                self.AddWorksheet(tab)
+            if not headers[header]["pos"] < 0:
+                self.worksheets[tab].writeCell(line[headers[header]["pos"]])
+=======
         if PROVINCEPOSTALCONV and "Province" in headers and headers["Province"] > 0: #convert the province labesl
             if line[headers["Province"]] in PROVINCEREMAP:
                  line[headers["Province"]] = PROVINCEREMAP[line[headers["Province"]]]
@@ -140,6 +220,7 @@ class XLSWorkbook():
                 self.AddWorksheet(tab)
             if not headers[header] < 0:
                 self.worksheets[tab].writeCell(line[headers[header]])
+>>>>>>> master
             
         self.worksheets[tab].nextRow()
             
@@ -156,8 +237,17 @@ class XLSWorksheet():
         self.summationRWYcol = None
         self.wbheaderformat = headerformat
         
+<<<<<<< HEAD
+        #write header
+        for header in HEADERS[tabname]:
+            if HEADERS[tabname][header]["alias"] != False:
+                self.worksheet.write(self.atRow, self.atCol, HEADERS[tabname][header]["alias"], self.wbheaderformat)
+            else:
+                self.worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
+=======
         for header in HEADERS[tabname]:
             self.worksheet.write(self.atRow, self.atCol, header, self.wbheaderformat)
+>>>>>>> master
             if header == SUMMATIONCOL:
                 self.summationRWYcol = chr(65 + self.atCol) #store the letter of the column
             self.atCol += 1
@@ -361,11 +451,19 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 #figure out the location of all the headers.
                 for header in line:
                     if header in HEADERS[name]:
+<<<<<<< HEAD
+                        HEADERS[name][header]["pos"] = index
+                    index += 1
+                    
+                for header in sorted(HEADERS[name]): #check if all headers matched
+                    if HEADERS[name][header]["pos"] < 0:
+=======
                         HEADERS[name][header] = index
                     index += 1
                     
                 for header in sorted(HEADERS[name]): #check if all headers matched
                     if HEADERS[name][header] < 0:
+>>>>>>> master
                         updateboxtext = "               WARNING!! Column \"" + header + "\" not found in file " + filename + "! " 
                         if header == "Region": updateboxtext+= "Region is required to build the files! Unable to process file!"
                         WriteWarnings(updateboxtext)
@@ -375,7 +473,11 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                         if FUZZYMATCHING: #If fuzzy matching enabled, try to match to something close
                             fuzzymatch = get_close_matches(header, line, n=1, cutoff=FUZZYLIMIT)
                             if len(fuzzymatch) > 0:
+<<<<<<< HEAD
+                                HEADERS[name][header]["pos"] = line.index(fuzzymatch[0])
+=======
                                 HEADERS[name][header] = line.index(fuzzymatch[0])
+>>>>>>> master
                                 updateboxtext = "                 " + header + " column not found! Using closest match " + fuzzymatch[0]
                                 WriteWarnings(updateboxtext)
                                 updatebox.insert(tk.END, updateboxtext)
@@ -387,7 +489,11 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 continue #read the next line of the file.
             #write to CSV file            
             
+<<<<<<< HEAD
+            workbookname = line[HEADERS[name]["Region"]["pos"]]
+=======
             workbookname = line[HEADERS[name]["Region"]]
+>>>>>>> master
             if workbookname == "" or workbookname == None:
                 updateboxtext = "               Row #" + str(lineat) + " has no Region!"
                 WriteWarnings(updateboxtext)
@@ -463,6 +569,7 @@ def ConvertToXLSX(updatebox, window, files):
             updatebox.yview(tk.END)    
             window.update()
             _ProcessFiles(updatebox, window, files, name, workbooks) #load all files into memory
+<<<<<<< HEAD
             
         
         
@@ -485,6 +592,30 @@ def ConvertToXLSX(updatebox, window, files):
             for wbname in workbooks:
                 workbooks[wbname].close()
             
+=======
+            
+        
+        
+        updateboxtext = "File converted, output saved to " + files["write"]
+        updatebox.insert(tk.END, updateboxtext)
+        updatebox.yview(tk.END)    
+        window.update()
+    except Exception as e:
+        ShowErrors(str(e))
+        with open("error.log", 'w') as errfile:
+            str(traceback.print_exc(file=errfile))
+        raise
+    finally:
+        #close all the workbooks (if any) open
+        RUNNING = False
+        if WARNINGS:
+            messagebox.showinfo(title="An Exception Occured!", message='Some warnings were raised! Please review the message log or see "warn.log" for mor information')
+            WARNINGS = False
+        if len(workbooks) > 0:
+            for wbname in workbooks:
+                workbooks[wbname].close()
+            
+>>>>>>> master
 def WriteWarnings(text):
     global WARNINGS
     WARNINGS = True
@@ -511,7 +642,11 @@ def WriteSettings(ConfigWindow):
     comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca",
                 "DELIMTER": "The delimiter used to separate values in the input CSV file.",
                 "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
+<<<<<<< HEAD
+                "HEADERS": "The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'alias': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.", 
+=======
                 "HEADERS": "The headers included in the input files. This setting has two levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. Column labels that you want included must take the form 'NAME': -1. Existing headers can be renamed.", 
+>>>>>>> master
                 "FORCEHEADER": "Boolean. If a suitable match for the column can't be found, then should the column be kept?",
                 "FUZZYMATCHING": "Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.",
                 "FUZZYLIMIT": "Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.",
@@ -525,7 +660,11 @@ def WriteSettings(ConfigWindow):
     
     for key in HEADERS:
         for item in HEADERS[key]:
+<<<<<<< HEAD
+            HEADERS[key][item]["pos"] = -1
+=======
             HEADERS[key][item] = -1
+>>>>>>> master
     
     with open(CONFIGFILE, "w") as configfile:
         settings = {"DELIMITER":DELIMITER, "QUOTECHAR":QUOTECHAR, "HEADERS":HEADERS,"FORCEHEADER":FORCEHEADER,
