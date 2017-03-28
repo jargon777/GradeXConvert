@@ -61,6 +61,7 @@ HEADERS["WSS"]["Region"]= {"pos": -1, "alias":False }
 HEADERS["WSS"]["Type"]= {"pos": -1, "alias": "Road NameHighway #" }
 #HEADERS["RANK"]["Rank"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["TC  Crossing ID"]= {"pos": -1, "alias":False }
+HEADERS["RANK"]["Risk - Total"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Railway"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Region"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Province"]= {"pos": -1, "alias":False }
@@ -70,7 +71,6 @@ HEADERS["RANK"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Subdivision"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Spur Mile Point"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Spur"]= {"pos": -1, "alias":False }
-HEADERS["RANK"]["RSIG  Location ID"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Latitude"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Longitude"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["Road  Authority  #1"]= {"pos": -1, "alias":False }
@@ -101,6 +101,9 @@ PROVINCEPOSTALCONV = True # converts provinces to postal abbreviations
 FORCEHEADER = True #forces unmatched headers to have a column number.
 RUNNING = False
 OUTSIDEKILL = False
+
+SPLITFILEON = "Region"
+DONOTSPLITFILE = ["RANK"] #files that won't be split
 
 ALLOWPARTIALFILE = True
 
@@ -296,7 +299,7 @@ def RunApplication(updatebox, window, Files):
         thread = threading.Thread(target=callback)
         thread.start()
             
-@error_catch  
+@error_catch
 def ShowConfig():
     ConfigWindow = tk.Toplevel()
     ConfigWindow.title("Configure GradeXConvertToXLSX")
@@ -346,9 +349,7 @@ def _CheckFiles(files, filename):
         return -2
     return 1
 
-def _ProcessFiles(updatebox, window, files, name, workbooks):
-    now = datetime.datetime.now()
-    now = now.strftime("OUTPUT %Y-%m-%d %H%M %S")
+def _ProcessFiles(updatebox, window, files, name, workbooks, now):
     filename = files[name].name
     global OUTSIDEKILL
     
@@ -369,7 +370,9 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                 for header in sorted(HEADERS[name]): #check if all headers matched
                     if HEADERS[name][header]["pos"] < 0:
                         updateboxtext = "               WARNING!! Column \"" + header + "\" not found in file " + filename + "! " 
-                        if header == "Region": updateboxtext+= "Region is required to build the files! Unable to process file!"
+                        if header == SPLITFILEON: 
+                            updateboxtext += SPLITFILEON 
+                            updateboxtext+= " is required to build the files! Unable to process file!"
                         WriteWarnings(updateboxtext)
                         updatebox.insert(tk.END, updateboxtext)
                         updatebox.yview(tk.END)
@@ -383,19 +386,21 @@ def _ProcessFiles(updatebox, window, files, name, workbooks):
                                 updatebox.insert(tk.END, updateboxtext)
                                 updatebox.yview(tk.END)
                                 window.update()
-                        if header == "Region" : return #important header, terminate
+                        if header == SPLITFILEON : return #important header, terminate
                         continue
                 lineat += 1
                 continue #read the next line of the file.
             #write to CSV file            
             
-            workbookname = line[HEADERS[name]["Region"]["pos"]]
+            workbookname = line[HEADERS[name][SPLITFILEON]["pos"]]
+            if name in DONOTSPLITFILE:
+                workbookname = name #don't split these files. Give them the name "name"
             if workbookname == "" or workbookname == None:
                 updateboxtext = "               Row #" + str(lineat) + " has no Region!"
                 WriteWarnings(updateboxtext)
                 updatebox.insert(tk.END, updateboxtext)
                 updatebox.yview(tk.END)
-                continue
+                workbookname = "No Region"
             
             if not workbookname in workbooks:
                 if not os.path.exists(files["write"] + "/" + now):
@@ -454,7 +459,8 @@ def ConvertToXLSX(updatebox, window, files):
                 return #don't do anything if files invalid
                 
             
-        
+        now = datetime.datetime.now()
+        now = now.strftime("OUTPUT %Y-%m-%d %H%M %S")
         for name in FILETYPES: #iterate through the files
             if name == "write": continue
             if files[name] == False: continue #skip if missing
@@ -464,11 +470,11 @@ def ConvertToXLSX(updatebox, window, files):
             updatebox.insert(tk.END, updateboxtext)
             updatebox.yview(tk.END)    
             window.update()
-            _ProcessFiles(updatebox, window, files, name, workbooks) #load all files into memory
+            _ProcessFiles(updatebox, window, files, name, workbooks, now) #load all files into memory
             
         
         
-        updateboxtext = "File converted, output saved to " + files["write"]
+        updateboxtext = "Files being written to " + files["write"]
         updatebox.insert(tk.END, updateboxtext)
         updatebox.yview(tk.END)    
         window.update()
@@ -486,6 +492,11 @@ def ConvertToXLSX(updatebox, window, files):
         if len(workbooks) > 0:
             for wbname in workbooks:
                 workbooks[wbname].close()
+            
+            updateboxtext = "All Files Written"
+            updatebox.insert(tk.END, updateboxtext)
+            updatebox.yview(tk.END)    
+            window.update()
             
 def WriteWarnings(text):
     global WARNINGS
@@ -510,20 +521,23 @@ def WriteSettings(ConfigWindow):
     global FUZZYMATCHING
     global FUZZYLIMIT
     
-    comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca",
+    comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca. See also https://github.com/jargon777/GradeXConvert for code.",
+                "ALLOWPARTIALFILE": "Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.",
                 "DELIMTER": "The delimiter used to separate values in the input CSV file.",
-                "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
-                "HEADERS": "The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'alias': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.", 
+                "DONOTSPLITFILE": "Files that will not be split according to SPLIFILEON",
+                "FILENAMEPREPEND": "This text is prepended to the filenames of the workbooks written, e.g. if it is set to 'test' then the AWS workbook will be 'testAWS.xlsx'. These names are not santized, and invalid characters will throw a file name error on execution.",
                 "FORCEHEADER": "Boolean. If a suitable match for the column can't be found, then should the column be kept?",
                 "FUZZYMATCHING": "Boolean. If set to true, the program will attempt to find a close match for the requested column. If set to false, exact matches are needed to column names. Fuzzy matching issues warnings to the screen if used.",
                 "FUZZYLIMIT": "Integer between 0 and 1, configures the limit of the fuzzy matching. 1 means more strict matching, 0 less strict.",
-                "SUMMATIONCOL": "Name of the column to use when generating the RWY sums",
-                "SUMMATIONDO": "Boolean. Whether or not the summation statistics are written to the excel file",
+                "HEADERS": "The headers included in the input files. The overall format is a dictionary datatype, declared as HEADERS['TAB']['NAME IN INPUT'] = {'pos':1, 'alias': NAME IN OUTPUT}. In laymans terms, this setting has three levels. In the first level, each of the tags is used to generate separate tabs in the files. This cannot be changed in the setting file without throwing errors. The second level has the names of the columns from the source files that will be included in the written file. Be sure the column exists if you change these values. The third level has two keys, 'pos' and 'remap'. 'pos' is used when converting, and must take the form 'pos': -1. 'remap' controls what is written to the ouput file. Existing headers can be renamed. The order of entries determines the order in the output.",
                 "NOSUMMATION": "List. If SUMMATIONDO is set to True, then these tabs will NOT get a summation box.",
                 "PROVINCEPOSTALCONV": "Boolean. Whether or not the program will try to convert the province names from non-standard abbreviations to postal abbreviations",
                 "PROVINCEPREMAP": "The names that are converted, in format 'Abbreviation : Postal Abbreviation'. Values matching 'Abbreviuation' will be converted to 'Postal Abbreviation'",
-                "FILENAMEPREPEND": "This text is prepended to the filenames of the workbooks written, e.g. if it is set to 'test' then the AWS workbook will be 'testAWS.xlsx'. These names are not santized, and invalid characters will throw a file name error on execution.",
-                "ALLOWPARTIALFILE": "Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided." }
+                "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
+                "SUMMATIONCOL": "Name of the column to use when generating the RWY sums",
+                "SUMMATIONDO": "Boolean. Whether or not the summation statistics are written to the excel file",
+                "SPLITFILEON": "String, the column that is used to separate the inputs into different files. Default is to create region-based files."
+                }
     
     for key in HEADERS:
         for item in HEADERS[key]:
@@ -533,7 +547,8 @@ def WriteSettings(ConfigWindow):
         settings = {"DELIMITER":DELIMITER, "QUOTECHAR":QUOTECHAR, "HEADERS":HEADERS,"FORCEHEADER":FORCEHEADER,
                     "FUZZYMATCHING":FUZZYMATCHING, "SUMMATIONCOL":SUMMATIONCOL, "PROVINCEREMAP":PROVINCEREMAP, 
                     "PROVINCEPOSTALCONV":PROVINCEPOSTALCONV, "FUZZYLIMIT":FUZZYLIMIT, "SUMMATIONDO":SUMMATIONDO,
-                    "NOSUMMATION":NOSUMMATION, "FILENAMEPREPEND":FILENAMEPREPEND, "ALLOWPARTIALFILE":ALLOWPARTIALFILE, "1-INSTRUCTIONS":comments}
+                    "NOSUMMATION":NOSUMMATION, "FILENAMEPREPEND":FILENAMEPREPEND, "ALLOWPARTIALFILE":ALLOWPARTIALFILE, 
+                    "SPLITFILEON":SPLITFILEON, "DONOTSPLITFILE":DONOTSPLITFILE,  "1-INSTRUCTIONS":comments}
         json.dump(settings, configfile, sort_keys=True, indent = 4)
     
     ConfigWindow.destroy()
@@ -587,6 +602,10 @@ def ReadSettings(ConfigWindow=None, Message=False):
                     SUMMATIONDO = settings["SUMMATIONDO"]
                 if "NOSUMMATION" in settings:
                     NOSUMMATION = settings["NOSUMMATION"]
+                if "SPLITFILEON" in settings:
+                    SPLITFILEON = settings["SPLITFILEON"]
+                if "DONOTSPLITFILE" in settings:
+                    DONOTSPLITFILE = settings["DONOTSPLITFILE"]
                 if "FILENAMEPREPEND" in settings:
                     FILENAMEPREPEND = settings["FILENAMEPREPEND"]
                 if "ALLOWPARTIALFILE" in settings:

@@ -3,14 +3,11 @@ This program is written specifically to convert output from GradeX (http://grade
 
 This is a general purpose batch CSV to Excel converter that has the ability to remove unwanted columns.
 
-
-
 ## Using the Program
 At the main screen, the top shows the messages the program is sending. There are 5 buttons to load files, a configure button, a run button and a close button. Load an AWS, PASSIVE, WIS, WSS CSV file using these buttons. Select a location to save using the “Save to…” button. When ready press “Run”. While the programming is running, pressing “Close” suspends the active processes (will not close the application).
 
 ## Configuration
 Configuration must be done manually through a JSON file. A number of options can be configured. In the program, the “configure” button can be used to navigate to a window that can export the default configuration file and load a file after it’s been changed. The following options can be configured:
-<<<<<<< HEAD
 
 ### ALLOWPARTIALFILE
 Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.
@@ -50,7 +47,6 @@ Boolean. Whether or not the summation statistics are written to the excel file
 
 ### ALLOWPARTIALFILE
 Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.
-=======
 
 ### ALLOWPARTIALFILE
 Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.
@@ -76,6 +72,7 @@ The headers included in the input files. This setting has two levels. In the fir
 ###PROVINCEPOSTALCONV 
 
 Boolean. Whether or not the program will try to convert the province names from non-standard abbreviations to postal abbreviations
+
 ###PROVINCEPREMAP 
 The names that are converted, in format 'Abbreviation : Postal Abbreviation'. Values matching 'Abbreviuation' will be converted to 'Postal Abbreviation'
 
@@ -87,5 +84,10 @@ Name of the column to use when generating the RWY sums
 
 ###SUMMATIONDO 
 Boolean. Whether or not the summation statistics are written to the excel file
->>>>>>> master
+
+###SPLITFILEON 
+String, the column that is used to separate the inputs into different files. Default is to create region-based files.
+
+###DONOTSPLITFILE
+Files that will not be split according to SPLIFILEON
 
