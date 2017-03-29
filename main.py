@@ -94,6 +94,7 @@ HEADERS["RANK"]["IsUrban"]= {"pos": -1, "alias":False }
 FILENAMEPREPEND = ""
 
 SUMMATIONCOL = "Railway"
+SUMMATIONS = ["Canadian National Railway", "Canadian Pacific Railway"]
 SUMMATIONDO = True
 NOSUMMATION = ["RANK"]
 
@@ -180,12 +181,11 @@ class XLSWorksheet():
     def writeSummation(self):
         Trow = 0
         Tcol = self.maxCol + 2 #skip a column
-        summations = ["CN", "CP"]
         
         self.worksheet.write(Trow, Tcol, "RWY", self.wbheaderformat)
         self.worksheet.write(Trow, Tcol + 1, self.name, self.wbheaderformat)
         
-        for summation in summations:
+        for summation in SUMMATIONS:
             Trow += 1
             sumfor = "=COUNTIF(" + self.summationRWYcol + ":" + self.summationRWYcol + "," + chr(65 + Tcol) + str(Trow + 1) + ")"
             self.worksheet.write(Trow, Tcol, summation)
@@ -206,8 +206,21 @@ class XLSWorksheet():
         self.atCol = 0 #advance and reset the rows.
         
     def writeCell(self, item):
-        self.worksheet.write(self.atRow, self.atCol, item)
+        try:
+            float(item)
+            item = float(item)
+            self.worksheet.write_number(self.atRow, self.atCol, item)
+        except ValueError:
+            self.worksheet.write(self.atRow, self.atCol, item)
+            
         self.atCol += 1
+    
+    def is_number(self, s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
 
 def main():
     Files = {}
@@ -478,7 +491,7 @@ def ConvertToXLSX(updatebox, window, files):
             
         
         
-        updateboxtext = "Files being written to " + files["write"]
+        updateboxtext = "Please wait, files being written to " + files["write"]
         updatebox.insert(tk.END, updateboxtext)
         updatebox.yview(tk.END)    
         window.update()
@@ -514,9 +527,13 @@ def ShowErrors(errorT):
     
 
 def WriteSettings(ConfigWindow):
+    global ALLOWPARTIALFILE
     global DELIMITER
     global QUOTECHAR
     global SUMMATIONCOL
+    global SUMMATIONDO
+    global SPLITFILEON
+    global DONOTSPLITFILE
     global NOSUMMATION
     global PROVINCEREMAP
     global PROVINCEPOSTALCONV
@@ -524,6 +541,9 @@ def WriteSettings(ConfigWindow):
     global FORCEHEADER
     global FUZZYMATCHING
     global FUZZYLIMIT
+    global FILENAMEPREPEND
+    global PROVINCEPREMAP
+    global SUMMATIONS
     
     comments = {"1":"This file contains a list of all the configurable variables. These instructions briefly highlight what each field does. Delete this file to restore defaults. This is a JSON file, you must write correct JSON code for it to be parsed. See http://www.json.org/ for more information. Further help with configuration can also be obtained by contacting mimuresa@uwaterloo.ca. See also https://github.com/jargon777/GradeXConvert for code.",
                 "ALLOWPARTIALFILE": "Boolean. Whether or not the program will run if some of the files are missing. Default is false, meaning AWS, PASSIVE, WIS and WSS CSV inputs must be provided.",
@@ -540,7 +560,8 @@ def WriteSettings(ConfigWindow):
                 "QUOTECHAR": "The quoting used to group together values that the delimiter in them in the input CSV file.",
                 "SUMMATIONCOL": "Name of the column to use when generating the RWY sums",
                 "SUMMATIONDO": "Boolean. Whether or not the summation statistics are written to the excel file",
-                "SPLITFILEON": "String, the column that is used to separate the inputs into different files. Default is to create region-based files."
+                "SPLITFILEON": "String, the column that is used to separate the inputs into different files. Default is to create region-based files.",
+                "SUMMATIONS": "List of the names included in the summary field."
                 }
     
     for key in HEADERS:
@@ -552,7 +573,7 @@ def WriteSettings(ConfigWindow):
                     "FUZZYMATCHING":FUZZYMATCHING, "SUMMATIONCOL":SUMMATIONCOL, "PROVINCEREMAP":PROVINCEREMAP, 
                     "PROVINCEPOSTALCONV":PROVINCEPOSTALCONV, "FUZZYLIMIT":FUZZYLIMIT, "SUMMATIONDO":SUMMATIONDO,
                     "NOSUMMATION":NOSUMMATION, "FILENAMEPREPEND":FILENAMEPREPEND, "ALLOWPARTIALFILE":ALLOWPARTIALFILE, 
-                    "SPLITFILEON":SPLITFILEON, "DONOTSPLITFILE":DONOTSPLITFILE,  "1-INSTRUCTIONS":comments}
+                    "SPLITFILEON":SPLITFILEON, "SUMMATIONS":SUMMATIONS, "DONOTSPLITFILE":DONOTSPLITFILE,  "1-INSTRUCTIONS":comments}
         json.dump(settings, configfile, sort_keys=True, indent = 4)
     
     ConfigWindow.destroy()
@@ -608,6 +629,8 @@ def ReadSettings(ConfigWindow=None, Message=False):
                     NOSUMMATION = settings["NOSUMMATION"]
                 if "SPLITFILEON" in settings:
                     SPLITFILEON = settings["SPLITFILEON"]
+                if "SUMMATIONS" in settings:
+                    SUMMATIONS = settings["SUMMATIONS"]
                 if "DONOTSPLITFILE" in settings:
                     DONOTSPLITFILE = settings["DONOTSPLITFILE"]
                 if "FILENAMEPREPEND" in settings:
