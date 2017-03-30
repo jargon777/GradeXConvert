@@ -19,7 +19,7 @@ import collections
 from tkinter.filedialog import askdirectory
 from difflib import get_close_matches
 
-CONFIGFILE = "custom-config.json"
+CONFIGFILE = "custom-config-3.json"
 DELIMITER = ","
 QUOTECHAR = '"'
 HEADERS = {"PASSIVE": collections.OrderedDict(), "AWS": collections.OrderedDict(), "WIS": collections.OrderedDict(), "WSS": collections.OrderedDict(), "RANK": collections.OrderedDict()}
@@ -33,7 +33,7 @@ HEADERS["PASSIVE"]["Spur Mile Point"]= {"pos": -1, "alias":False}
 HEADERS["PASSIVE"]["Spur"]= {"pos": -1, "alias":False }
 HEADERS["PASSIVE"]["Last  Inspection Date"]= {"pos": -1, "alias":"Last InspectionDate" }
 HEADERS["PASSIVE"]["Last  Inspection By"]= {"pos": -1, "alias":"Last InspectionBy" }
-HEADERS["PASSIVE"]["ProtectionType"]= {"pos": -1, "alias": "Passive Protection" }
+HEADERS["PASSIVE"]["AWS Protection (group)"]= {"pos": -1, "alias": "Passive Protection" }
 HEADERS["AWS"]["Location Original ID"]= {"pos": -1, "alias":"TC Crossing ID" }
 HEADERS["AWS"]["Risk - Total"]= {"pos": -1, "alias":False }
 HEADERS["AWS"]["Region"]= {"pos": -1, "alias":False }
@@ -54,6 +54,7 @@ HEADERS["WIS"]["Last  Inspection By"]= {"pos": -1, "alias":"Last Inspection By" 
 HEADERS["WIS"]["Province"]= {"pos": -1, "alias":False }
 HEADERS["WIS"]["Region"]= {"pos": -1, "alias":False }
 HEADERS["WIS"]["Type"]= {"pos": -1, "alias": False}
+HEADERS["WIS"]["Road Name Highway #"]= {"pos": -1, "alias":False}
 HEADERS["WSS"]["Location Original ID"]= {"pos": -1, "alias":False }
 HEADERS["WSS"]["Railway"]= {"pos": -1, "alias":False }
 HEADERS["WSS"]["Subdivision Mile Point"]= {"pos": -1, "alias":False }
@@ -62,6 +63,7 @@ HEADERS["WSS"]["Last  Inspection Date"]= {"pos": -1, "alias":"Last Inspection Da
 HEADERS["WSS"]["Last  Inspection By"]= {"pos": -1, "alias":"Last Inspection By" }
 HEADERS["WSS"]["Province"]= {"pos": -1, "alias":False }
 HEADERS["WSS"]["Region"]= {"pos": -1, "alias":False }
+HEADERS["WSS"]["Type"]= {"pos": -1, "alias": False}
 HEADERS["WSS"]["Road Name Highway #"]= {"pos": -1, "alias":False}
 #HEADERS["RANK"]["Rank"]= {"pos": -1, "alias":False }
 HEADERS["RANK"]["TC  Crossing ID"]= {"pos": -1, "alias":False }
@@ -577,7 +579,7 @@ def WriteSettings(ConfigWindow):
         json.dump(settings, configfile, sort_keys=True, indent = 4)
     
     ConfigWindow.destroy()
-    messagebox.showinfo(title="Configurations Saved", message='Configuration File saved as "custom-config.json"')
+    messagebox.showinfo(title="Configurations Saved", message='Configuration File saved as ' + CONFIGFILE)
     
      
 def askFile(key, fileDict, label, window):
