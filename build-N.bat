@@ -1,1 +1,1 @@
-pyinstaller --onefile --windowed main.py
+pyinstaller --onefile --windowed main.py --paths C:\Python35\Lib\site-packages\PyQt5\Qt\bin
