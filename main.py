@@ -129,7 +129,7 @@ FILENAMEPREPEND = ""
 SUMMATIONCOL = "Railway"
 SUMMATIONS = ["Canadian National Railway", "Canadian Pacific Railway"]
 SUMMATIONDO = True
-NOSUMMATION = ["RANK", "2018EngGradeX", "First 500 Crossings English"]
+NOSUMMATION = ["RANK", "EngGradeX", "First 500 Crossings English"]
 
 REMAPDICT = {}
 REMAPDICT["Province"] = {"Ont.":"ON", "Man.":"MB", "B.C.":"BC", "Que.":"QC", "N.B.":"NB", "N.S.":"NS", 
@@ -531,7 +531,7 @@ def _ProcessFiles(updatebox, window, files, name, workbooks, now):
         
         lines.sort(key=lambda x: x[HEADERS[name][SORTRANK]["pos"]], reverse=True)
         workbookname = name
-        tabname = "2018EngGradeX"
+        tabname = "EngGradeX"
         tabname500 = "First 500 Crossings English"
         if not workbookname in workbooks:
             if not os.path.exists(files["write"] + "/" + now):
